@@ -1,0 +1,8 @@
+yfinance
+finvizfinance
+ffn
+matplotlib
+pandas
+numpy
+seaborn
+fpdf
