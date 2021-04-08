@@ -9,7 +9,6 @@ from pandas_datareader import data as web
 #Ignore warnings
 import warnings
 warnings.filterwarnings("ignore")
-#%%
 
 def main():
 
