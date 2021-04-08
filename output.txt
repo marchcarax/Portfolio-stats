@@ -1,0 +1,19 @@
+---------------------------------
+Portfolio expected annualised return is 356.0 and volatility is 88.0
+Sharpe ratio : 26.01
+---------------------------------
+Portfolio efficiency analysis
+Return with Maximum SR: 354.30
+Volality with Maximum SR: 113.22
+Max Sharpe Ratio: 3.13
+Optimized allocation (in %):
+Symbol: cciv, Weight: 35.93
+Symbol: pltr, Weight: 3.21
+Symbol: spce, Weight: 3.87
+Symbol: gme, Weight: 22.62
+Symbol: nvda, Weight: 34.38
+---------------------------------
+Table displaying monthly and YTD returns:
+  Year     Jan    Feb     Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec     YTD
+------  ------  -----  ------  -----  -----  -----  -----  -----  -----  -----  -----  -----  ------
+  2021  119.95   7.74  -11.09    2.3      0      0      0      0      0      0      0      0  115.53
