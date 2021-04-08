@@ -6,7 +6,7 @@ Remember to keep a history of your portfolio performance by saving the output.tx
 For a quick glance at a ticker fundamental data, run fanal_main.py and put the Stock Ticker to analyze.
 
 
-Will update in the future with strategies of how to use these tools and how to add/take exposure from the market
+Will update in the future with strategies of how to use these tools and how to add/take exposure from the market.
 Also, will upload some personal projects with time:
-    - FC tools: predictive models are mostly useless in Fat tails distributions, but there are some interesting uses
-    - Some of my most successful trading strategies (Mean reversion, Pairs trading)
+    - FC tools: predictive models are mostly useless in Fat tails distributions, but there are some interesting uses.
+    - Some of my most successful trading strategies (Mean reversion, Pairs trading).
