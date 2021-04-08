@@ -32,6 +32,3 @@ def monthly_returns_table(df: pd.Series, wts):
     print('Table displaying monthly and YTD returns:')
     stats.display_monthly_returns()
 
-def stats_to_csv(df: pd.DataFrame):
-
-    stats = ffn.PerformanceStats(df).to_csv('stats.csv')

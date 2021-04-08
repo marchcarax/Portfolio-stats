@@ -51,9 +51,6 @@ def main():
     #weak months. Is "sell in may and go away" true to your portfolio?
     calcs.monthly_returns_table(df, weight)
 
-    #Creates a csv with stats for each stock in the portfolio
-    #calcs.stats_to_csv(df)
-
     #Outputs to txt file for easy reading and keeping history performance
     #Takes double time to output the txt, its just faster to copy and paste, feel free to hide the code
     try:
