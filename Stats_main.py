@@ -19,7 +19,7 @@ def main():
     
     #Analysis timetable
     start_date = "2021-01-01"
-    end_date = "2021-04-06"
+    end_date = "2021-04-012"
  
     #Get data
     df = web.get_data_yahoo(stocks, start = start_date, end = end_date)
