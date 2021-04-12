@@ -11,7 +11,6 @@ def main():
     series = pd.read_csv('Predictive models\\Data\\MSFT.csv', header=0, index_col=0)
     #test period:
     n = 20
-
     split_point = len(series) - n
     dataset, validation = series[0:split_point], series[split_point:]
     print('Dataset %d, Validation %d' % (len(dataset), len(validation)))
