@@ -17,5 +17,6 @@ def main():
 if __name__ == '__main__':
     #I actually want to downgrade numpy to the one compatible with tensorflow
     #its faster just updating tensorflow and the package will uninstall and install the right numpy
-    os.system('pip install -U tensorflow')
+    #You can hide the line if your numpy is already compatible
+    #os.system('pip install -U tensorflow')
     main()

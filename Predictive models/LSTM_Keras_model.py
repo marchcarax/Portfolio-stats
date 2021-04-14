@@ -61,12 +61,13 @@ def Keras_Model(series, n):
     model.add(layers.LSTM(units = 50))
     model.add(layers.Dropout(0.2))
 
+    #LSTM for time series should have Dense(1)
     model.add(layers.Dense(units = 1))
 
     model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
     model.fit(X_train, y_train, epochs = 100)
-
+    model.summary()
     #Read Real data to compare
     dataset_test = pd.read_csv('Predictive models\\Data\\validation.csv')
     real_stock_price = dataset_test.iloc[:, 4:5].values
@@ -86,7 +87,6 @@ def Keras_Model(series, n):
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     predicted_stock_price = model.predict(X_test)
     predicted_stock_price = sc.inverse_transform(predicted_stock_price)
-    print(predicted_stock_price)
 
     #Model error
     rmse = sqrt(mean_squared_error(real_stock_price, predicted_stock_price))
