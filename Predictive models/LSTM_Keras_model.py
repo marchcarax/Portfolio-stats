@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,6 +12,12 @@ from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 
 def Keras_Model(series, n):
+
+    #due to incompatibilities between tensorflow and numpy, I downgrade numpy
+    try:
+        os.system('pip install numpy==1.19.5 --user')
+    except Exception:
+        pass
 
     split_point = len(series) - n
     dataset, validation = series[0:split_point], series[split_point:]
