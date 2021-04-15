@@ -7,7 +7,6 @@ from math import sqrt
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.stattools import adfuller
 from sklearn.preprocessing import MinMaxScaler
-#from sklearn import preprocessing
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_pacf
 import scipy.stats as stats
@@ -97,7 +96,7 @@ def prediction_graph(series_predict, price: pd.DataFrame):
     initial_price = price['Adj Close'][:-len(price)+1]
     df_predict = src.price_calcs.logreturns_to_price(initial_price, series_predict, df)
     df_predict['real'] = price['Adj Close'].ffill()
-    df_predict.to_csv('Predictive models\\Data\\prediction.csv')
+    df_predict.to_csv('Predictive models\\Data\\ARIMA_prediction.csv')
 
     #Prepare graph
     plt.figure(figsize=(15,8))
@@ -111,7 +110,6 @@ def prediction_graph(series_predict, price: pd.DataFrame):
 
 def future_date(df: pd.DataFrame):
     #it creates the Future dates for the graphs
-    #doesnt work, look whats happening
     date_ori = pd.to_datetime(df.index).tolist()
     for i in range(len(df)):
         date_ori.append(date_ori[-1] + timedelta(days = 1))
