@@ -10,12 +10,13 @@ def main():
     n = 20
 
     model = LSTM_Keras_model.Keras_Model(series, n)
-    LSTM_Keras_model.Keras_Forecast(model, series, n)
+    LSTM_Keras_model.Keras_Forecast(model,series, n)
 
 
 if __name__ == '__main__':
-    #I actually want to downgrade numpy to the one compatible with tensorflow
-    #its faster just updating tensorflow and the package will uninstall and install the right numpy
-    #You can hide the line if your numpy is already compatible
-    #os.system('pip install -U tensorflow')
+    #due to incompatibilities between tensorflow and numpy, I downgrade numpy
+    try:
+        os.system('pip install numpy==1.19.5')
+    except Exception:
+        pass
     main()
