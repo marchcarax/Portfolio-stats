@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
+from datetime import timedelta
 
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from math import sqrt
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
 
 def Keras_Model(series, n):
 
@@ -20,7 +21,6 @@ def Keras_Model(series, n):
     #We will do the ARIMA tests and model with logreturns
     dataset_train = pd.read_csv('Predictive models\\Data\\dataset.csv', header=0, index_col=0)
     dataset_train = dataset_train.iloc[:,4:5].values
-    print(dataset_train)
 
     #Scaling data
     sc = MinMaxScaler(feature_range = (0, 1))
@@ -29,18 +29,13 @@ def Keras_Model(series, n):
     #Transforms data: LSTMs expect our data to be in a specific format (3D array)
     X_train = []
     y_train = []
-    X_eval = []
-    y_eval = []
+
     for i in range(60, len(training_set_scaled)-1):
         X_train.append(training_set_scaled[i-60:i, 0])
-        X_eval.append(training_set_scaled[i-60:i, 0])
         y_train.append(training_set_scaled[i, 0])
-        y_eval.append(training_set_scaled[i, 0])
 
     X_train, y_train = np.array(X_train), np.array(y_train)
-    X_eval, y_eval = np.array(X_eval), np.array(y_eval)
     X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
-    X_eval = np.reshape(X_eval, (X_eval.shape[0], X_eval.shape[1], 1))
 
     #Sequential for initializing the neural network
     #Dense for adding a densely connected neural network layer
@@ -71,6 +66,8 @@ def Keras_Model(series, n):
     #Read Real data to compare
     dataset_test = pd.read_csv('Predictive models\\Data\\validation.csv')
     real_stock_price = dataset_test.iloc[:, 4:5].values
+    dataset_test.set_index('Date', inplace = True)
+    print(dataset_test)
 
     #Prepare data to predict stock prices
     #Reshape the dataset as done previously
@@ -79,27 +76,24 @@ def Keras_Model(series, n):
     inputs = series_close[split_point - 60:].values
     inputs = inputs.reshape(-1,1)
     inputs = sc.transform(inputs)
-    X_test = []
+    y_pred = []
 
     for i in range(60, 60+n):
-        X_test.append(inputs[i-60:i, 0])
-    X_test = np.array(X_test)
-    X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
-    predicted_stock_price = model.predict(X_test)
-    predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+        y_pred.append(inputs[i-60:i, 0])
+    y_pred = np.array(y_pred)
+    y_pred = np.reshape(y_pred, (y_pred.shape[0], y_pred.shape[1], 1))
+    y_pred = model.predict(y_pred)
+    predicted_stock_price = sc.inverse_transform(y_pred)
 
     #Model error
     rmse = sqrt(mean_squared_error(real_stock_price, predicted_stock_price))
     print('Mean square error between train model and test data is: %.2f'%(rmse))
-    #Model evaluation
-    score = model.evaluate(X_eval, y_eval, verbose = 0) 
-    print('Test loss: %.2f'%(score))
-    print('Test accuracy: %.2f'%((1-score)*100))
     
     #Plotting the results
     plt.figure(figsize=(15,8))
-    plt.plot(real_stock_price, color = 'red', label = 'Real Data')
     plt.plot(predicted_stock_price, color = 'green', label = 'Predicted Data')
+    plt.plot(dataset_test['Adj Close'], color = 'red', label = 'Real Data')
+    plt.xticks(dataset_test.index)
     plt.title('Price Prediction')
     plt.xlabel('Time')
     plt.ylabel('Price')
@@ -107,10 +101,19 @@ def Keras_Model(series, n):
     plt.savefig('Predictive models\\Prediction graphs\\LSTM_Train_test_prediction.png')
     plt.show()
 
+    #Save csv data for test vs train LSTM keras
+    dataset_test['lstm_pred'] = predicted_stock_price
+    dataset_test.to_csv('Predictive models\\Data\\KerasLSTM_prediction.csv')
+
     #Return model to re-use later in forecast
     return model
 
 def Keras_Forecast(model, series, n):
+
+    #Prepare Future Dates
+    future_dates = future_date(series.iloc[-n:,:])
+    df = pd.DataFrame(index = future_dates)
+    df = df[-n:]
 
     #Prepare data
     series_close = series.iloc[:,4:5].values
@@ -147,12 +150,31 @@ def Keras_Forecast(model, series, n):
         
     pred_seq.append(predicted)
     predicted_stock_price = sc.inverse_transform(pred_seq).reshape(-1,1)
+    df['estimate'] = predicted_stock_price
 
     #Graph results
     plt.figure(figsize=(15,8))
-    plt.plot(predicted_stock_price, color = 'green', label = 'Predicted Data')
+    plt.plot(df['estimate'], color = 'green', label = 'Predicted Data')
     plt.title('Price Prediction')
     plt.xlabel('Time')
     plt.ylabel('Price')
     plt.savefig('Predictive models\\Prediction graphs\\LSTM_prediction.png')
     plt.show()
+
+    #Save predicted prices + last n days in test vs train data
+    df_predict = pd.read_csv('Predictive models\\Data\\KerasLSTM_prediction.csv')
+    df_predict.set_index('Date', inplace = True)
+    df_predict = pd.concat([df_predict, df])
+    df_predict["prediction"] = np.where(df_predict["lstm_pred"].isna(),df_predict["estimate"],df_predict["lstm_pred"]).astype("float")
+    df_predict = df_predict.drop("estimate",axis=1)
+    df_predict = df_predict.drop("lstm_pred",axis=1)
+    print(df_predict)
+    df_predict.to_csv('Predictive models\\Data\\KerasLSTM_prediction.csv')
+
+def future_date(df: pd.DataFrame):
+    #it creates the Future dates for the graphs
+    date_ori = pd.to_datetime(df.index).tolist()
+    for i in range(len(df)):
+        date_ori.append(date_ori[-1] + timedelta(days = 1))
+    date_ori = pd.Series(date_ori).dt.strftime(date_format = '%Y-%m-%d').tolist()
+    return date_ori
