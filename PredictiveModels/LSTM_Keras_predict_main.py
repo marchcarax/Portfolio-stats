@@ -1,3 +1,4 @@
+import os
 import LSTM_Keras_model
 import pandas as pd
 
@@ -13,7 +14,14 @@ def main():
 def keras_calc(series, n):
     model = LSTM_Keras_model.Keras_Model(series, n)
     LSTM_Keras_model.Keras_Forecast(model,series, n)
+    try:
+        os.system('deactivate')
+    except Exception:
+        pass
 
 
 if __name__ == '__main__':
+    #due to incompatibilities between tensorflow and numpy, I created a virtual env with the compatible versions for tensorflow
+    #you will need numpy=1.19.5 or below for the file to run
+    os.system("MLprepared\\Scripts\\activate.bat")
     main()
