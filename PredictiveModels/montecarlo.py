@@ -34,7 +34,6 @@ def montecarlo_model(series, n):
     #returns flattened array
     raveled = results.values.ravel() 
     raveled.sort()
-    cp_raveled = raveled.copy()
 
     #Simulations graphs
     plt.figure(figsize=(17,5))
@@ -52,4 +51,4 @@ def montecarlo_model(series, n):
     plt.legend()
     plt.show()
     
-    return raveled
+    return results
