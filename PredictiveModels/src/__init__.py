@@ -1,3 +1,1 @@
-import os
-#I need this due to compatibility issues
-os.system('pip install -U numpy --user')
+__all__ = ['arima_calcs, price_calcs']
