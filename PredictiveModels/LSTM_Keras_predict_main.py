@@ -10,7 +10,7 @@ def main():
     keras_calc(series, n)
 
 
-def keras_calc(series: pd.DataFrame, n: int):
+def keras_calc(series, n):
     model = LSTM_Keras_model.Keras_Model(series, n)
     LSTM_Keras_model.Keras_Forecast(model,series, n)
 
