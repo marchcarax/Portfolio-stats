@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from datetime import timedelta
 
 import tensorflow as tf
@@ -90,15 +91,16 @@ def Keras_Model(series, n):
     print('Mean square error between train model and test data is: %.2f'%(rmse))
     
     #Plotting the results
-    plt.figure(figsize=(15,8))
-    plt.plot(predicted_stock_price, color = 'green', label = 'Predicted Data')
-    plt.plot(dataset_test['Adj Close'], color = 'red', label = 'Real Data')
-    plt.xticks(dataset_test.index)
-    plt.title('Price Prediction')
-    plt.xlabel('Time')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.savefig('PredictiveModels\\Prediction graphs\\LSTM_Train_test_prediction.png')
+    fig = plt.figure(figsize=(15,8))
+    ax = fig.add_axes([0.1,0.1,0.8,0.8])
+    ax.plot(predicted_stock_price, color = 'green', label = 'Predicted Data')
+    ax.plot(dataset_test['Adj Close'], color = 'red', label = 'Real Data')
+    ax.set_xticks(dataset_test.index)
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=2))
+    ax.set_title('Price Prediction')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Price')
+    fig.savefig('PredictiveModels\\Prediction graphs\\LSTM_Train_test_prediction.png')
     plt.show()
 
     #Save csv data for test vs train LSTM keras
@@ -152,15 +154,6 @@ def Keras_Forecast(model, series, n):
     predicted_stock_price = sc.inverse_transform(pred_seq).reshape(-1,1)
     df['estimate'] = predicted_stock_price
 
-    #Graph results
-    plt.figure(figsize=(15,8))
-    plt.plot(df['estimate'], color = 'green', label = 'Predicted Data')
-    plt.title('Price Prediction')
-    plt.xlabel('Time')
-    plt.ylabel('Price')
-    plt.savefig('PredictiveModels\\Prediction graphs\\LSTM_prediction.png')
-    plt.show()
-
     #Save predicted prices + last n days in test vs train data
     df_predict = pd.read_csv('PredictiveModels\\Data\\KerasLSTM_prediction.csv')
     df_predict.set_index('Date', inplace = True)
@@ -170,6 +163,19 @@ def Keras_Forecast(model, series, n):
     df_predict = df_predict.drop("lstm_pred",axis=1)
     print(df_predict)
     df_predict.to_csv('PredictiveModels\\Data\\KerasLSTM_prediction.csv')
+
+    #Graph results
+    fig = plt.figure(figsize=(15,8))
+    ax = fig.add_axes([0.1,0.1,0.8,0.8])
+    ax.plot(df_predict['prediction'], color = 'green', label = 'Predicted Data')
+    ax.plot(df_predict['Adj Close'], color = 'red', label = 'Real Data')
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=4))
+    plt.axvline(x = n-1, color = 'b')
+    ax.set_title('Price Prediction')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Price')
+    fig.savefig('PredictiveModels\\Prediction graphs\\LSTM_prediction.png')
+    plt.show()
 
 def future_date(df: pd.DataFrame):
     #it creates the Future dates for the graphs
