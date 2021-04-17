@@ -100,6 +100,7 @@ def Keras_Model(series, n):
     ax.set_title('Price Prediction')
     ax.set_xlabel('Time')
     ax.set_ylabel('Price')
+    plt.legend()
     fig.savefig('PredictiveModels\\Prediction graphs\\LSTM_Train_test_prediction.png')
     plt.show()
 
@@ -174,6 +175,7 @@ def Keras_Forecast(model, series, n):
     ax.set_title('Price Prediction')
     ax.set_xlabel('Time')
     ax.set_ylabel('Price')
+    plt.legend()
     fig.savefig('PredictiveModels\\Prediction graphs\\LSTM_prediction.png')
     plt.show()
 
