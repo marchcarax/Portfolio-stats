@@ -8,6 +8,7 @@ from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.stattools import adfuller
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from statsmodels.graphics.tsaplots import plot_pacf
 import scipy.stats as stats
 from datetime import timedelta
@@ -76,12 +77,15 @@ def plot_normal(x_range, mu=0, sigma=1, cdf=False, **kwargs):
 
 def prediction_traintest_graph(series: pd.DataFrame):
     
-    plt.figure(figsize=(15,8))
-    plt.title('Train vs Test data ARIMA prediction')
-    plt.plot(series['Adj Close'],color='r', label = 'Real price')
-    plt.plot(series['predict'],color='g', label = 'Prediction')
-    plt.legend()
-    plt.savefig('PredictiveModels\\Prediction graphs\\Train_test_prediction.png')
+    fig = plt.figure(figsize=(15,8))
+    ax = fig.add_axes([0.1,0.1,0.8,0.8])
+    ax.set_title('Train vs Test data ARIMA prediction')
+    ax.plot(series['Adj Close'],color='r', label = 'Real price')
+    ax.plot(series['predict'],color='g', label = 'Prediction')
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=2))
+    ax.set_xlabel('Date')
+    ax.set_ylabel("Price")
+    fig.savefig('PredictiveModels\\Prediction graphs\\Train_test_prediction.png')
     plt.show()
 
     print(series)
@@ -99,13 +103,16 @@ def prediction_graph(series_predict, price: pd.DataFrame):
     df_predict.to_csv('PredictiveModels\\Data\\ARIMA_prediction.csv')
 
     #Prepare graph
-    plt.figure(figsize=(15,8))
-    plt.title('ARIMA prediction')
-    plt.plot(df_predict['predict'],color='g', label = 'Prediction')
-    plt.plot(df_predict['real'],color='r', label = 'Real Price')
+    fig = plt.figure(figsize=(15,8))
+    ax = fig.add_axes([0.1,0.1,0.8,0.8])
+    ax.set_title('ARIMA prediction')
+    ax.plot(df_predict['predict'],color='g', label = 'Prediction')
+    ax.plot(df_predict['real'],color='r', label = 'Real Price')
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+    ax.set_xlabel('Date')
+    ax.set_ylabel("Price")
     plt.axvline(x = len(price)-1, color = 'b')
-    plt.legend()
-    plt.savefig('PredictiveModels\\Prediction graphs\\Arima_prediction.png')
+    fig.savefig('PredictiveModels\\Prediction graphs\\Arima_prediction.png')
     plt.show()  
 
 def future_date(df: pd.DataFrame):
