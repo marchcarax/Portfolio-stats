@@ -85,6 +85,7 @@ def prediction_traintest_graph(series: pd.DataFrame):
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=2))
     ax.set_xlabel('Date')
     ax.set_ylabel("Price")
+    plt.legend()
     fig.savefig('PredictiveModels\\Prediction graphs\\Train_test_prediction.png')
     plt.show()
 
@@ -111,6 +112,7 @@ def prediction_graph(series_predict, price: pd.DataFrame):
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
     ax.set_xlabel('Date')
     ax.set_ylabel("Price")
+    plt.legend()
     plt.axvline(x = len(price)-1, color = 'b')
     fig.savefig('PredictiveModels\\Prediction graphs\\Arima_prediction.png')
     plt.show()  
