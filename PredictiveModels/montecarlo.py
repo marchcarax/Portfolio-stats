@@ -50,5 +50,11 @@ def montecarlo_model(series, n):
     plt.title('simulation $\mu$ = %.2f, $\sigma$ = %.2f'%(raveled.mean(),raveled.std()))
     plt.legend()
     plt.show()
+
+    #Avg results to send back
+    mean_results = []
+    for i in range(n):
+        meanprice = np.array(results.iloc[i])
+        mean_results.append(np.mean(meanprice))
     
-    return results
+    return mean_results
