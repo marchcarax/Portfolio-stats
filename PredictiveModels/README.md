@@ -1,10 +1,9 @@
 We have analyzed 4 basic prediction models, in and out of sample data:
 1. ARIMA model
 2. Keras LSTM
-3. Tensorflow RNN LSTM
-4. Montecarlo simulations
-5. Gradient boost
-6. Stack ARIMA + Keras + Gradient boost
+3. Montecarlo simulations
+4. Gradient boost
+5. Stack ARIMA + Keras + Gradient boost
 
 While the models in-sample were very promising, the out-of-sample predictions have been very underwhelming. It's understandable as there are too many factors that can influence a stock price, from fundamental data, random political events, periods of positve or negative sentiment...
 
