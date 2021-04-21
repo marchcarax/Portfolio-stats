@@ -19,7 +19,6 @@ def Keras_Model(series, n):
     dataset.to_csv('PredictiveModels\\Data\\dataset.csv', index=True)
     validation.to_csv('PredictiveModels\\Data\\validation.csv', index=True)
     
-    #We will do the ARIMA tests and model with logreturns
     dataset_train = pd.read_csv('PredictiveModels\\Data\\dataset.csv', header=0, index_col=0)
     dataset_train = dataset_train.iloc[:,4:5].values
 
