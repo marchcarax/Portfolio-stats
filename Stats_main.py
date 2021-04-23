@@ -3,6 +3,7 @@ import os
 import stockanalytics
 import portfolio_corr
 import calcs
+import to_pdf
 import pandas as pd
 from pandas_datareader import data as web
 
@@ -14,12 +15,12 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    stocks = ['cciv','pltr','spce','gme','nvda']
-    weight = [0.35, 0.15, 0.35, 0.05, 0.1]
+    stocks = ['fb','orcl']
+    weight = [0.5, 0.5]
     
     #Analysis timetable
     start_date = "2021-01-01"
-    end_date = "2021-04-012"
+    end_date = "2021-04-22"
  
     #Get data
     df = web.get_data_yahoo(stocks, start = start_date, end = end_date)
@@ -58,6 +59,8 @@ def main():
         pass
     
     os.system('python .\Stats_main.py > output.txt')
+    #Creates and saves pdf
+    to_pdf.main()
 
 
 if __name__ == '__main__':
