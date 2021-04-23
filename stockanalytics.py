@@ -7,12 +7,9 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import seaborn as sns
 
-# Statistical calculation
 import statsmodels.api as sm
 from statsmodels import regression
 from scipy.stats import norm
-
-# Tabular data output
 from tabulate import tabulate
 from pandas_datareader import data as web
 from datetime import datetime
@@ -80,6 +77,13 @@ def sharpe_ratio(stocks, wts):
   #print("Sharpe ratio : %.2f"%(port_sharpe_ratio))
   return port_sharpe_ratio
 
+def sortino_ratio(returns):
+
+  #Calculates the sortino ratio given a series of returns
+  returns = returns.values - 1
+  res = returns.mean() / returns[returns < 0].std()
+  return res
+
 def portfolio_info(stocks, weights):
    
   price_data = stocks
@@ -96,6 +100,9 @@ def portfolio_info(stocks, weights):
   print('Portfolio expected annualised return is {} and volatility is {}'.format(portfolio_return*100,portfolio_std_dev*100))
   port_sharpe_ratio = sharpe_ratio(stocks, weights)
   print("Sharpe ratio : %.2f"%(port_sharpe_ratio))
+  returns = cum_returns(stocks, weights)
+  ret_sortino = sortino_ratio(returns)
+  print("Sortino ratio : %.2f"%(ret_sortino))
     
 def efficient_frontier(stock_list, start_date, end_date, iterations):
 
