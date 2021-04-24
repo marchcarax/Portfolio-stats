@@ -12,10 +12,9 @@ def main():
     real_price = arima.real
     keras_lstm = pd.read_csv('PredictiveModels\\Data\\KerasLSTM_prediction.csv', header=0, index_col=0)
     series = pd.read_csv('PredictiveModels\\Data\\msft.csv')
-    montecarlo_res = montecarlo.montecarlo_model(series, 20)
-    montecarlo_res = np.insert(montecarlo_res, 0, np.zeros(20))
-    print(montecarlo_res)
-    print(len(montecarlo_res))
+    n_pred = 10 #predicted days
+    montecarlo_res = montecarlo.montecarlo_model(series, n_pred)
+    montecarlo_res = np.insert(montecarlo_res, 0, np.zeros(len(real_price)-n_pred))
     stack_predict = np.vstack([arima['predict'].values, keras_lstm['prediction'].values]).T
     
     #Prepare data
