@@ -55,6 +55,7 @@ def main():
     ax.plot(real_price, color = 'black', label = 'real price')
     ax.plot(ypred, color = 'green', label = 'xgboost')
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+    plt.axvline(x = len(ypred)-n_pred-1, color = 'b')
     ax.set_title('Prediction')
     ax.set_xlabel('Time')
     ax.set_ylabel('Price')
