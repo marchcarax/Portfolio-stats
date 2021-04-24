@@ -26,7 +26,8 @@ def Keras_Model(series, n):
     sc = MinMaxScaler(feature_range = (0, 1))
     training_set_scaled = sc.fit_transform(dataset_train)
 
-    #Transforms data: LSTMs expect our data to be in a specific format (3D array)
+    #Transforms data: LSTMs expect our data to be in a specific format (3D array), using timesteps = 60,
+    #LSTM will look at 3 prior months of data
     X_train = []
     y_train = []
 
@@ -44,7 +45,7 @@ def Keras_Model(series, n):
     model = keras.Sequential()
 
     model.add(layers.Reshape(target_shape = (60,1), input_shape = (X_train.shape[1], 1)))
-    model.add(layers.LSTM(units = 50, return_sequences = True))
+    model.add(layers.LSTM(units = 100, return_sequences = True))
     model.add(layers.Dropout(0.2))
 
     model.add(layers.LSTM(units = 50, return_sequences = True))
@@ -53,7 +54,7 @@ def Keras_Model(series, n):
     model.add(layers.LSTM(units = 50, return_sequences = True))
     model.add(layers.Dropout(0.2))
 
-    model.add(layers.LSTM(units = 50))
+    model.add(layers.LSTM(units = 25, return_sequences = False))
     model.add(layers.Dropout(0.2))
 
     #LSTM for time series should have Dense(1)
@@ -132,9 +133,6 @@ def Keras_Forecast(model, series, n):
     X_train, y_train = np.array(X_train), np.array(y_train)
     X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 
-    #Fit model with data to predict
-    model.fit(X_train, y_train, epochs = 100)
-
     #Creates prediction given a pred_len
     pred_seq = []
     pred_len = n
@@ -142,10 +140,11 @@ def Keras_Forecast(model, series, n):
 
     #Last 60 prices
     current = X_train[len(X_train)-1]
-    k=0
+    print('x shape in forecast model ', current.shape)
 
     for i in range(0, pred_len):
         predicted.append(model.predict(current[None, :, :])[0,0])
+        #slides current to keep las n days with new pred
         current = current[1:]
         #its adding the new element (predictde value) at the end of the array
         current = np.insert(current, len(current), predicted[-1], axis=0)
@@ -170,7 +169,7 @@ def Keras_Forecast(model, series, n):
     ax.plot(df_predict['prediction'], color = 'green', label = 'Predicted Data')
     ax.plot(df_predict['Adj Close'], color = 'red', label = 'Real Data')
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=4))
-    plt.axvline(x = n-1, color = 'b')
+    plt.axvline(x = len(df_predict)-n-1, color = 'b')
     ax.set_title('Price Prediction')
     ax.set_xlabel('Time')
     ax.set_ylabel('Price')
