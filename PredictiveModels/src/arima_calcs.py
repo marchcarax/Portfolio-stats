@@ -101,6 +101,8 @@ def prediction_graph(series_predict, price: pd.DataFrame):
     initial_price = price['Adj Close'][:-len(price)+1]
     df_predict = src.price_calcs.logreturns_to_price(initial_price, series_predict, df)
     df_predict['real'] = price['Adj Close'].ffill()
+    #print(df_predict.head())
+    df_predict = df_predict[:-10]
     df_predict.to_csv('PredictiveModels\\Data\\ARIMA_prediction.csv')
 
     #Prepare graph
