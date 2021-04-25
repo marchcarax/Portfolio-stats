@@ -6,3 +6,7 @@ pandas
 numpy
 seaborn
 fpdf
+tensorflow
+pmdarima
+xgboost
+sklearn
