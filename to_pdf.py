@@ -12,7 +12,7 @@ def main():
     #read all files from a given directory
     path = 'C:\\Users\\march\\OneDrive\\Documentos\\GitHub\\Portfolio-stats\\figures'
     imagelist = os.listdir(path)
-    print(imagelist)
+    #print(imagelist)
 
     #Creating first pdf page image
     image1 = Image.open(path + '\\' + imagelist[0])
