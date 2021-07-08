@@ -6,6 +6,7 @@ import calcs
 import to_pdf
 import pandas as pd
 from pandas_datareader import data as web
+import yfinance as yf
 
 #Ignore warnings
 import warnings
@@ -15,15 +16,16 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    stocks = ['fb','orcl']
-    weight = [0.5, 0.5]
+    stocks = ['fb','unp', 'gld', 'amd', 'tlt'] #--> GOOD ONES
+    #stocks = ['ibe.mc','ele.mc', 'eng.mc']
+    weight = [0.2, 0.2, 0.2, 0.2, 0.2] 
     
     #Analysis timetable
-    start_date = "2021-01-01"
-    end_date = "2021-12-31"
+    start_date = "2020-01-01"
+    end_date = "2021-07-07"
  
     #Get data
-    df = web.get_data_yahoo(stocks, start = start_date, end = end_date)
+    df = yf.download(stocks, start = start_date, end = end_date)
     df = df['Adj Close']
 
     #Cumulative Returns

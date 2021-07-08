@@ -14,6 +14,8 @@ from tabulate import tabulate
 from pandas_datareader import data as web
 from datetime import datetime
 
+import yfinance as yf
+
 
 def cum_returns_graph(stocks, wts):
 
@@ -42,7 +44,7 @@ def cum_returns_benchmark(stocks, wts, benchmark, start_date, end_date):
 
   cumulative_ret_df1 = cum_returns(stocks, wts)
 
-  df2 = web.DataReader(benchmark, data_source='yahoo', start = start_date, end= end_date )
+  df2 = yf.download(benchmark, start = start_date, end= end_date )
   price_data2 = df2['Adj Close']
   return_df2 = price_data2.pct_change()[1:]
   cumulative_ret_df2 = (return_df2 + 1).cumprod()
@@ -106,7 +108,7 @@ def portfolio_info(stocks, weights):
     
 def efficient_frontier(stock_list, start_date, end_date, iterations):
 
-  stock_raw = web.DataReader(stock_list, 'yahoo', start=start_date, end=end_date)
+  stock_raw = yf.download(stock_list, start=start_date, end=end_date)
   stock = stock_raw['Close']
   #df = pd.DataFrame(stock)
   #port_ret = stock.sum(axis=1)
