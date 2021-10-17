@@ -5,8 +5,11 @@ import portfolio_corr
 import calcs
 import to_pdf
 import pandas as pd
+import numpy as np
 from pandas_datareader import data as web
 import yfinance as yf
+import riskfolio as rp
+import matplotlib.pyplot as plt
 
 #Ignore warnings
 import warnings
@@ -16,13 +19,17 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    stocks = ['fb','unp', 'gld', 'amd', 'tlt'] #--> GOOD ONES
-    #stocks = ['ibe.mc','ele.mc', 'eng.mc']
-    weight = [0.2, 0.2, 0.2, 0.2, 0.2] 
+    stocks = ['amd','fb', 'gld', 'mrna', 'tlt', 'atvi', 'bac', 'rep.mc', 'csx', 'nvda'] 
+    #stocks = ['csx','gld','msft', 'nvda', 'regn']
+    #stocks = ['atvi','eth', 'fb', 'msft', 'rblx']
+    stocks.sort()
+    weight = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    #weight = [0.2, 0.2, 0.2, 0.2, 0.2] 
+    linkages = ['ward', 'DBHT']
     
     #Analysis timetable
-    start_date = "2020-01-01"
-    end_date = "2021-07-07"
+    start_date = "2019-01-01"
+    end_date = "2021-12-31"
  
     #Get data
     df = yf.download(stocks, start = start_date, end = end_date)
@@ -61,6 +68,27 @@ def main():
         pass
     
     os.system('python .\Stats_main.py > output.txt')
+
+    #Create Hierarchical clustering graphs
+    df.columns = stocks
+    Y = df[stocks].pct_change().dropna()
+    fig, ax = plt.subplots(len(linkages), 1, figsize=(12, 15))
+    ax = np.ravel(ax)
+    j=0
+    for i in linkages:
+        ax[j] = rp.plot_network(returns=Y,
+        codependence='pearson',
+        linkage=i,
+        k=None,
+        max_k=10,
+        leaf_order=True,
+        kind='spring',
+        seed=0,
+        ax=ax[j])
+        j+=1
+        
+    plt.savefig('figures\\network_graph.png')
+
     #Creates and saves pdf
     to_pdf.main()
 
