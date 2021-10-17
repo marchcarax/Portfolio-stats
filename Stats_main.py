@@ -87,7 +87,7 @@ def main():
         ax=ax[j])
         j+=1
         
-    plt.savefig('figures\\network_graph.png')
+    plt.savefig('figures\\z_network_graph.png')
 
     #Creates and saves pdf
     to_pdf.main()
