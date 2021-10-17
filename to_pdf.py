@@ -26,7 +26,7 @@ def main():
     imageaux = get_concat_v(image3, image4)
     get_concat_v(imageaux, image6).save('pdf\\concat2.png')
 
-    imagelist2 = ['concat1.png', 'concat2.png']
+    imagelist2 = ['concat1.png', 'concat2.png', 'figures\\z_network_graph.png']
 
     #Creating pdf
     pdf = FPDF()
@@ -44,6 +44,13 @@ def main():
     pdf.cell(50, 8, 'Portfolio Analysis', 1, 0, 'C')
     pdf.ln(10)
     pdf.image('pdf\\' + imagelist2[1], w=195, h=250)
+    #Third page
+    pdf.add_page()
+    pdf.set_author('March')
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(50, 8, 'Hierarchical Network', 1, 0, 'C')
+    pdf.ln(10)
+    pdf.image(imagelist2[2], w=195, h=250)
 
     #Saving pdf
     pdf.output("pdf\\portfolio_analysis.pdf", "F")
