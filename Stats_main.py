@@ -19,12 +19,12 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    stocks = ['amd','fb', 'gld', 'mrna', 'tlt', 'atvi', 'bac', 'rep.mc', 'csx', 'nvda'] 
-    #stocks = ['csx','gld','msft', 'nvda', 'regn']
-    #stocks = ['atvi','eth', 'fb', 'msft', 'rblx']
+    stocks = ['eng.mc','ele.mc', 'kl', 'bbva.mc', 'san.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
+             'open', 'regn', 'msft', 'rblx', 'fb', 'pltr', 'orcl'] 
+    #stocks = ['orcl','gld','pltr', 'mrna', 'gild']
     stocks.sort()
-    weight = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    #weight = [0.2, 0.2, 0.2, 0.2, 0.2] 
+    total_stocks = len(stocks)
+    weight = [1/total_stocks]*total_stocks 
     linkages = ['ward', 'DBHT']
     
     #Analysis timetable
