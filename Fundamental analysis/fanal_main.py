@@ -4,7 +4,7 @@ import fundamental_anal as fanal
 def main():
 
     #Put the ticker to analyze:
-    ticker = 'NOC'
+    ticker = 'atvi'
     fanal.fundamental_data(ticker)
 
     #I like outputs...

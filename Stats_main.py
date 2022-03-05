@@ -19,9 +19,11 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    stocks = ['eng.mc','ele.mc', 'kl', 'bbva.mc', 'san.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
-             'open', 'regn', 'msft', 'rblx', 'fb', 'pltr', 'orcl'] 
-    #stocks = ['orcl','gld','pltr', 'mrna', 'gild']
+    #stocks = ['eng.mc','ele.mc', 'kl', 'bbva.mc', 'san.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
+    #         'open', 'regn', 'msft', 'rblx', 'fb', 'pltr', 'atvi', 'vid.mc', 'or.pa'] 
+    #stocks = ['orcl','snow','aapl', 'mrna', 'gild']
+    stocks = ['eng.mc','ele.mc','bbva.mc', 'san.mc', 'rep.mc','ibe.mc','vid.mc', 'or.pa']
+    #stocks = ['kl','csx', 'nvda','open', 'regn', 'msft', 'rblx', 'fb', 'pltr', 'atvi']
     stocks.sort()
     total_stocks = len(stocks)
     weight = [1/total_stocks]*total_stocks 
@@ -29,7 +31,7 @@ def main():
     
     #Analysis timetable
     start_date = "2019-01-01"
-    end_date = "2021-12-31"
+    end_date = "2022-12-31"
  
     #Get data
     df = yf.download(stocks, start = start_date, end = end_date)

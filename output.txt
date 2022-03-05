@@ -1,37 +1,32 @@
-[                       0%                       ][******                12%                       ]  2 of 16 completed[*********             19%                       ]  3 of 16 completed[************          25%                       ]  4 of 16 completed[***************       31%                       ]  5 of 16 completed[******************    38%                       ]  6 of 16 completed[********************* 44%                       ]  7 of 16 completed[**********************50%                       ]  8 of 16 completed[**********************56%**                     ]  9 of 16 completed[**********************56%**                     ]  9 of 16 completed[**********************69%********               ]  11 of 16 completed[**********************75%***********            ]  12 of 16 completed[**********************81%**************         ]  13 of 16 completed[**********************88%*****************      ]  14 of 16 completed[**********************94%********************   ]  15 of 16 completed[*********************100%***********************]  16 of 16 completed
+[                       0%                       ][************          25%                       ]  2 of 8 completed[************          25%                       ]  2 of 8 completed[**********************50%                       ]  4 of 8 completed[**********************62%*****                  ]  5 of 8 completed[**********************75%***********            ]  6 of 8 completed[**********************75%***********            ]  6 of 8 completed[*********************100%***********************]  8 of 8 completed
 ---------------------------------
-Portfolio expected annualised return is 38.0 and volatility is 21.0
-Sharpe ratio : 1.63
-Sortino ratio : 31.87
+Portfolio expected annualised return is 11.0 and volatility is 21.0
+Sharpe ratio : 0.43
+Sortino ratio : 3.94
 [*********************100%***********************]  1 of 1 completed
-[                       0%                       ][******                12%                       ]  2 of 16 completed[*********             19%                       ]  3 of 16 completed[************          25%                       ]  4 of 16 completed[***************       31%                       ]  5 of 16 completed[******************    38%                       ]  6 of 16 completed[********************* 44%                       ]  7 of 16 completed[**********************50%                       ]  8 of 16 completed[**********************56%**                     ]  9 of 16 completed[**********************62%*****                  ]  10 of 16 completed[**********************69%********               ]  11 of 16 completed[**********************75%***********            ]  12 of 16 completed[**********************81%**************         ]  13 of 16 completed[**********************88%*****************      ]  14 of 16 completed[**********************94%********************   ]  15 of 16 completed[*********************100%***********************]  16 of 16 completed
-[                       0%                       ][******                12%                       ]  2 of 16 completed[*********             19%                       ]  3 of 16 completed[************          25%                       ]  4 of 16 completed[***************       31%                       ]  5 of 16 completed[******************    38%                       ]  6 of 16 completed[********************* 44%                       ]  7 of 16 completed[**********************50%                       ]  8 of 16 completed[**********************56%**                     ]  9 of 16 completed[**********************62%*****                  ]  10 of 16 completed[**********************69%********               ]  11 of 16 completed[**********************75%***********            ]  12 of 16 completed[**********************81%**************         ]  13 of 16 completed[**********************88%*****************      ]  14 of 16 completed[**********************94%********************   ]  15 of 16 completed[*********************100%***********************]  16 of 16 completed
+[                       0%                       ][************          25%                       ]  2 of 8 completed[******************    38%                       ]  3 of 8 completed[**********************50%                       ]  4 of 8 completed[**********************62%*****                  ]  5 of 8 completed[**********************75%***********            ]  6 of 8 completed[**********************88%*****************      ]  7 of 8 completed[*********************100%***********************]  8 of 8 completed
+[                       0%                       ][************          25%                       ]  2 of 8 completed[******************    38%                       ]  3 of 8 completed[**********************50%                       ]  4 of 8 completed[**********************62%*****                  ]  5 of 8 completed[**********************75%***********            ]  6 of 8 completed[**********************88%*****************      ]  7 of 8 completed[*********************100%***********************]  8 of 8 completed
 ---------------------------------
 Portfolio efficiency analysis:
-Return with Maximum SR: 41.02
-Volality with Maximum SR: 24.13
-Max Sharpe Ratio: 1.70
+Return with Maximum SR: 9.61
+Volality with Maximum SR: 21.15
+Max Sharpe Ratio: 0.45
 Optimized allocation (in %):
-Symbol: bbva.mc, Weight: 1.37
-Symbol: csx, Weight: 6.48
-Symbol: ele.mc, Weight: 3.21
-Symbol: eng.mc, Weight: 4.35
-Symbol: fb, Weight: 3.08
-Symbol: ibe.mc, Weight: 13.56
-Symbol: kl, Weight: 0.55
-Symbol: msft, Weight: 6.22
-Symbol: nvda, Weight: 13.33
-Symbol: open, Weight: 9.92
-Symbol: orcl, Weight: 10.75
-Symbol: pltr, Weight: 11.31
-Symbol: rblx, Weight: 0.46
-Symbol: regn, Weight: 10.49
-Symbol: rep.mc, Weight: 1.54
-Symbol: san.mc, Weight: 3.40
+Symbol: bbva.mc, Weight: 23.25
+Symbol: ele.mc, Weight: 2.92
+Symbol: eng.mc, Weight: 1.41
+Symbol: ibe.mc, Weight: 31.96
+Symbol: or.pa, Weight: 28.79
+Symbol: rep.mc, Weight: 1.06
+Symbol: san.mc, Weight: 1.25
+Symbol: vid.mc, Weight: 9.35
 ---------------------------------
 Table displaying monthly and YTD returns:
-  Year    Jan    Feb    Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec    YTD
-------  -----  -----  -----  -----  -----  -----  -----  -----  -----  -----  -----  -----  -----
-  2019   8.33   3.24   0.71   2.75  -5.47   5.68  -1.9   -0.82   2.44   2.99   1.98   2.08  23.56
-  2020  -0.39  -2.62  -9.88   9.49   3.58   4.88   1.18   2.7   -0.01  -1.72  22.31   0.62  30.67
-  2021   1.73   1.27   1.86   4.95   4.45   2.54  -1.4    6.54  -3.48   9.76   0.69   0     32.17
+  Year    Jan    Feb     Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec    YTD
+------  -----  -----  ------  -----  -----  -----  -----  -----  -----  -----  -----  -----  -----
+  2019   6.85   2.75    0.5    3.69  -3.68   1.54  -3.11  -1.42   5.09   1.71   1.2    2.93  18.97
+  2020  -0.37  -6.43  -18.03   5.58   0.87   5.65  -2.79  -2.63  -3.85  -1.42  25.1    1.23  -2.28
+  2021  -3.78   8.39    2.91   1.97   5.13  -0.76  -0.09   1.38  -3.54   6.57  -6.95   6.11  17.39
+  2022  -1.11  -2.2     0      0      0      0      0      0      0      0      0      0     -3.29
+W Matrix too small 
+
