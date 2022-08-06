@@ -10,23 +10,23 @@ def get_concat_v(im1, im2):
 
 def main():
     #read all files from a given directory
-    path = 'C:\\Users\\march\\OneDrive\\Documentos\\GitHub\\Portfolio-stats\\figures'
+    path = "./figures"
     imagelist = os.listdir(path)
     #print(imagelist)
 
     #Creating first pdf page image
     image1 = Image.open(path + '\\' + imagelist[0])
     image2 = Image.open(path + '\\' + imagelist[1])
-    get_concat_v(image1, image2).save('pdf\\concat1.png')
+    get_concat_v(image1, image2).save('./pdf/concat1.png')
 
     #Creating second pdf page image
     image3 = Image.open(path + '\\' + imagelist[2])
     image4 = Image.open(path + '\\' + imagelist[3])
     image6 = Image.open(path + '\\' + imagelist[5])
     imageaux = get_concat_v(image3, image4)
-    get_concat_v(imageaux, image6).save('pdf\\concat2.png')
+    get_concat_v(imageaux, image6).save('./pdf/concat2.png')
 
-    imagelist2 = ['concat1.png', 'concat2.png', 'figures\\z_network_graph.png']
+    imagelist2 = ['concat1.png', 'concat2.png', './figures/z_network_graph.png']
 
     #Creating pdf
     pdf = FPDF()
@@ -53,7 +53,7 @@ def main():
     pdf.image(imagelist2[2], w=195, h=250)
 
     #Saving pdf
-    pdf.output("pdf\\portfolio_analysis.pdf", "F")
+    pdf.output("./pdf/portfolio_analysis.pdf", "F")
 
 if __name__=='__main__':
     main()

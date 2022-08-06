@@ -19,8 +19,8 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    stocks = ['eng.mc','ele.mc', 'kl', 'bbva.mc', 'san.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
-             'open', 'regn', 'msft', 'rblx', 'fb', 'pltr', 'orcl'] 
+    stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
+             'bac', 'regn', 'msft', 'team', 'fb', 'or.pa', 'atvi', 'gdx'] 
     #stocks = ['orcl','gld','pltr', 'mrna', 'gild']
     stocks.sort()
     total_stocks = len(stocks)
@@ -29,7 +29,7 @@ def main():
     
     #Analysis timetable
     start_date = "2019-01-01"
-    end_date = "2021-12-31"
+    end_date = "2022-12-31"
  
     #Get data
     df = yf.download(stocks, start = start_date, end = end_date)
