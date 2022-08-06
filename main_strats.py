@@ -46,7 +46,7 @@ def main():
 
     initial_capital_s1 = st.sidebar.slider('Choose initial capital for strat 1', 10000, 100000, value=50000, step=10000)
     initial_capital_s2_s3 = st.sidebar.slider('Choose initial capital for strat 2&3', 10000, 100000, value=20000, step=10000)
-    add_capital = st.sidebar.slider('Choose amount to periodically add', 1000, 10000, value=1000, step=1000)
+    add_capital = st.sidebar.slider('Choose amount to periodically add', 1000, 5000, value=1000, step=500)
     returns_spy['SPY'] = initial_capital_s1 * returns_spy.SPY
 
     #Strategy 1: Buy 50000 in 2019 and hold
@@ -73,23 +73,25 @@ def main():
     fig = prepare_full_graph(df_total)
     st.plotly_chart(fig, use_container_width=False)
 
+    risk_free_return = 2.5
+
     st.markdown('#### Strategy 1: Buy and hold')
     st.markdown('Basic strategy that buys 50K from the period chosen and holds until today')
     mean, stdev = portfolio_info(returns_s1)
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {}'.format((mean - 2)/stdev))
+    st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('#### Strategy 2: Buy every 3 months')
     st.markdown('After an initial capital investment, we add capital every 3 months')
     mean, stdev = portfolio_info(returns_s2)
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {}'.format((mean - 2)/stdev))
+    st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('#### Strategy 3: Buy after every month when RSI < 35')
     st.markdown('After an initial capital investment, we add capital every month when RSI is lower than 35 or we wait until that happens')
     mean, stdev = portfolio_info(returns_s3.drop(['rsi', 'buy'], axis=1))
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {}'.format((mean - 2)/stdev))
+    st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('##### RSI graph')
     fig = px.line(returns_s3, x="date", y='rsi')
