@@ -33,12 +33,9 @@ def cum_returns_graph(stocks, wts):
 
 def cum_returns(stocks, wts):
 
-  price_data = stocks
-  ret_data = price_data.pct_change()[1:]
-  weighted_returns = (wts * ret_data)
+  weighted_returns = (wts * stocks.pct_change()[1:])
   port_ret = weighted_returns.sum(axis=1)
-  cumulative_ret = (port_ret + 1).cumprod()
-  return cumulative_ret
+  return (port_ret + 1).cumprod() 
     
 def cum_returns_benchmark(stocks, wts, benchmark, start_date, end_date):
 
