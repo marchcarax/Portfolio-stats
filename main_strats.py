@@ -43,7 +43,11 @@ def main():
     weight = [1/total_stocks]*total_stocks 
  
     #Get data
-    df = yf.download(stocks, start = start_date, end = "2022-12-31")
+    @st.cache
+    def get_data(stocks, start_date, end_date):
+        return yf.download(stocks, start = start_date, end = end_date)
+    
+    df = get_data(stocks, start_date = start_date, end_date = "2022-12-31")
     df = df['Adj Close']
     spy = df.pop('SPY')
 
@@ -120,20 +124,20 @@ def main():
     st.plotly_chart(fig, use_container_width=False)
 
     st.markdown('#### Strategy 4: Buy everytime rolling sharpe cycles lower')
-    st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0')
-    mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy'], axis=1))
+    st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6')
+    mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy', 'sell'], axis=1))
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
     st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('##### Rolling sharpe graph')
     fig = px.line(returns_s4, x="date", y='sharpe')
     fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
-    fig.add_hline(y=0.5, line_color="red", line_dash="dash")
+    fig.add_hline(y=0.6, line_color="red", line_dash="dash")
     st.plotly_chart(fig, use_container_width=False)
     st.write('Last rolling sharpe data point is {}'.format(returns_s4.sharpe[-1:].values))
 
-    st.markdown('##### Buy signals for Strat 4')
-    fig = px.line(returns_s4, x="date", y='buy')
+    st.markdown('##### Buy & Sell signals for Strat 4')
+    fig = px.line(returns_s4, x="date", y=['buy', 'sell'])
     st.plotly_chart(fig, use_container_width=False)
 
 def prepare_full_graph(df):
@@ -160,7 +164,6 @@ def compute_strat_2(df, capital, add_capital, start_date):
         if row.date > date_to_add:
             capital += add_capital
             date_to_add += datetime.timedelta(days=90)
-            add = True
         df.at[index,'ret'] *= capital
 
     return df
@@ -212,19 +215,31 @@ def compute_strat_3(df, capital, add_capital, start_date, n):
 def compute_strat_4(df, capital, add_capital, start_date, buy):
 
     df['buy'] = 0
+    df['sell'] = 0
+    sell = 0.6
 
     date_to_add = start_date + datetime.timedelta(days=30)
+    date_to_take = start_date + datetime.timedelta(days=30)
     add = False
+    take = False
     for idx, row in df.iterrows():
         if (row.sharpe < buy) and (row.date > date_to_add):
             capital += add_capital
             date_to_add = row['date'] + datetime.timedelta(days=30)
             add  = True
-        df.at[idx,'ret'] *= capital
         if add: df.at[idx,'buy'] = 1
+        if (row.sharpe > sell) and (row.date > date_to_take):
+            capital *= 0.98 #we take 2% of benefits
+            date_to_take = row['date'] + datetime.timedelta(days=90)
+            take = True
+        if take: df.at[idx,'sell'] = 1
+
+        df.at[idx,'ret'] *= capital
         add = False
+        take = False
 
     return df
+
 
 
 if __name__=='__main__':
