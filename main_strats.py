@@ -10,7 +10,6 @@ import streamlit as st
 import warnings
 warnings.filterwarnings("ignore")
 
-import stockanalytics
 import yfinance as yf
 import datetime
 
@@ -18,7 +17,10 @@ def main():
 
     # Begin Streamlit dashboard
     st.set_page_config(layout="wide")
+
     st.title('Investment strategies - Performance analysis')
+    st.write('by [Marc](https://www.linkedin.com/in/marc-hernandez-fernandez-4481528b/)')
+    
     st.sidebar.caption('Last update: Aug 2022')
     start_date = st.sidebar.date_input(
      "Choose Intial date",
@@ -52,7 +54,7 @@ def main():
     spy = df.pop('SPY')
 
     #call cumulative returns
-    returns = stockanalytics.cum_returns(df, weight).reset_index()
+    returns = cum_returns(df, weight).reset_index()
     returns_spy = (1 + spy.pct_change()[1:]).cumprod().reset_index()
     returns.rename(columns={'Date':'date', 0:'ret'}, inplace=True)
 
@@ -91,7 +93,7 @@ def main():
     df_total['ret_s3'] = returns_s3.ret
     df_total['ret_s4'] = returns_s4.ret
     fig = prepare_full_graph(df_total)
-    st.plotly_chart(fig, use_container_width=False)
+    st.plotly_chart(fig, use_container_width=True)
 
     risk_free_return = 2.5
 
@@ -99,19 +101,19 @@ def main():
     st.markdown('Basic strategy that buys 50K from the period chosen and holds until today')
     mean, stdev = portfolio_info(returns_s1)
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
+    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('#### Strategy 2: Buy every 3 months')
     st.markdown('After an initial capital investment, we add capital every 3 months')
     mean, stdev = portfolio_info(returns_s2)
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
+    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('#### Strategy 3: Buy after every month when RSI < 35')
     st.markdown('After an initial capital investment, we add capital every month when RSI is lower than 35 or we wait until that happens')
     mean, stdev = portfolio_info(returns_s3.drop(['rsi', 'buy'], axis=1))
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
+    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('##### RSI graph')
     fig = px.line(returns_s3, x="date", y='rsi')
@@ -127,7 +129,7 @@ def main():
     st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6')
     mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy', 'sell'], axis=1))
     st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {}'.format((mean - risk_free_return)/stdev))
+    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
     st.markdown('##### Rolling sharpe graph')
     fig = px.line(returns_s4, x="date", y='sharpe')
@@ -152,10 +154,16 @@ def portfolio_info(stocks):
     #calculate annualised portfolio volatility
     portfolio_std_dev = round(np.sqrt(cov_data) * np.sqrt(252),2)
 
-    return portfolio_return*100, portfolio_std_dev*100
+    return portfolio_return*100, float(portfolio_std_dev.values)*100
 
 def rolling_sharpe(df, n = 20, risk_free = 0):
     return (df.pct_change().rolling(n).mean() - risk_free) / df.pct_change().rolling(n).std()
+
+def cum_returns(stocks, wts):
+
+  weighted_returns = (wts * stocks.pct_change()[1:])
+  port_ret = weighted_returns.sum(axis=1)
+  return (port_ret + 1).cumprod() 
 
 def compute_strat_2(df, capital, add_capital, start_date):
 

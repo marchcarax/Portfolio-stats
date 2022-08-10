@@ -1,12 +1,5 @@
 yfinance
-finvizfinance
-ffn
-matplotlib
+plotly
 pandas
 numpy
-seaborn
-fpdf
-tensorflow
-pmdarima
-xgboost
-sklearn
+plotly

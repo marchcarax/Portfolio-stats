@@ -1,39 +1,0 @@
-[                       0%                       ][                       0%                       ][                       0%                       ][                       0%                       ][*****************     35%                       ]  6 of 17 completed[**************        29%                       ]  5 of 17 completed[********************  41%                       ]  7 of 17 completed[**********************47%                       ]  8 of 17 completed[**********************53%                       ]  9 of 17 completed[**********************59%***                    ]  10 of 17 completed[**********************65%******                 ]  11 of 17 completed[**********************71%*********              ]  12 of 17 completed[**********************71%*********              ]  12 of 17 completed[**********************82%**************         ]  14 of 17 completed[**********************88%*****************      ]  15 of 17 completed[**********************94%********************   ]  16 of 17 completed[*********************100%***********************]  17 of 17 completed
----------------------------------
-Portfolio expected annualised return is 19.0 and volatility is 19.0
-Sharpe ratio : 0.99
-Sortino ratio : inf
-[*********************100%***********************]  1 of 1 completed
-[                       0%                       ][******                12%                       ]  2 of 17 completed[*********             18%                       ]  3 of 17 completed[*********             18%                       ]  3 of 17 completed[**************        29%                       ]  5 of 17 completed[*****************     35%                       ]  6 of 17 completed[********************  41%                       ]  7 of 17 completed[**********************47%                       ]  8 of 17 completed[**********************53%                       ]  9 of 17 completed[**********************59%***                    ]  10 of 17 completed[**********************65%******                 ]  11 of 17 completed[**********************65%******                 ]  11 of 17 completed[**********************76%***********            ]  13 of 17 completed[**********************82%**************         ]  14 of 17 completed[**********************88%*****************      ]  15 of 17 completed[**********************94%********************   ]  16 of 17 completed[*********************100%***********************]  17 of 17 completed
-[                       0%                       ][******                12%                       ]  2 of 17 completed[*********             18%                       ]  3 of 17 completed[************          24%                       ]  4 of 17 completed[**************        29%                       ]  5 of 17 completed[*****************     35%                       ]  6 of 17 completed[********************  41%                       ]  7 of 17 completed[**********************47%                       ]  8 of 17 completed[**********************53%                       ]  9 of 17 completed[**********************59%***                    ]  10 of 17 completed[**********************65%******                 ]  11 of 17 completed[**********************71%*********              ]  12 of 17 completed[**********************76%***********            ]  13 of 17 completed[**********************82%**************         ]  14 of 17 completed[**********************88%*****************      ]  15 of 17 completed[**********************94%********************   ]  16 of 17 completed[*********************100%***********************]  17 of 17 completed
----------------------------------
-Portfolio efficiency analysis:
-Return with Maximum SR: 20.45
-Volality with Maximum SR: 23.07
-Max Sharpe Ratio: 0.89
-Optimized allocation (in %):
-Symbol: atvi, Weight: 5.75
-Symbol: bac, Weight: 2.42
-Symbol: bbva.mc, Weight: 3.60
-Symbol: csx, Weight: 7.62
-Symbol: ele.mc, Weight: 1.01
-Symbol: eng.mc, Weight: 1.49
-Symbol: fb, Weight: 3.52
-Symbol: gdx, Weight: 9.69
-Symbol: ibe.mc, Weight: 6.94
-Symbol: itx.mc, Weight: 2.26
-Symbol: msft, Weight: 13.14
-Symbol: nvda, Weight: 14.54
-Symbol: or.pa, Weight: 1.56
-Symbol: regn, Weight: 7.66
-Symbol: rep.mc, Weight: 5.54
-Symbol: team, Weight: 9.25
-Symbol: vid.mc, Weight: 4.03
----------------------------------
-Table displaying monthly and YTD returns:
-  Year    Jan    Feb     Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec     YTD
-------  -----  -----  ------  -----  -----  -----  -----  -----  -----  -----  -----  -----  ------
-  2019   8.86   2.92    2.33   2.82  -5.42   6.23  -0.15  -0.3    1.61   4.01   3.51   3.83   33.94
-  2020   0.73  -3.06  -10.43  11.51   6.85   3.68   2.93   2.9   -3.38  -2.54  14.53   1.52   25.3
-  2021  -2.41   4.49    3.17   4.09   4.69   1.64   1.06   4.08  -4.05   8.64  -4.7    4.01   26.64
-  2022  -3.46  -3.41    2.01  -4.52  -0.2   -7.81   4.04   2.44   0      0      0      0     -10.94
