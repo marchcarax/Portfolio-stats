@@ -18,15 +18,20 @@ def main():
     # Begin Streamlit dashboard
     st.set_page_config(layout="wide")
 
-    st.title('Investment strategies - Performance analysis')
+    st.title('Portfolio strategy analysis')
     st.write('by [Marc](https://www.linkedin.com/in/marc-hernandez-fernandez-4481528b/)')
+
+    st.markdown('')
     
+    st.markdown('The goal of the app is to show how following simple investment strategies can outperform the market in the long term. '
+                'It follows the naive principal of having an equal-weighted portfolio and each time you add to the portfolio, you are adding equally to all positions. '
+                
+    )
     st.sidebar.caption('Last update: Aug 2022')
     start_date = st.sidebar.date_input(
      "Choose Intial date",
      datetime.date(2019, 1, 1))
 
-    st.markdown('#### Strategy comparison')
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
@@ -52,6 +57,8 @@ def main():
     df = get_data(stocks, start_date = start_date, end_date = "2022-12-31")
     df = df['Adj Close']
     spy = df.pop('SPY')
+    
+    st.markdown('#### Simple strategies comparison')
 
     #call cumulative returns
     returns = cum_returns(df, weight).reset_index()
@@ -79,10 +86,14 @@ def main():
 
     #Strategy 4: Buy everytime rolling sharpe cycles lower
     # Define our Lookback period (our sliding window)
-    buy_signal = st.sidebar.slider('Choose window lenght for RSI', -0.5, 0.0, value=-0.1, step=0.1)
+    buy_signal = st.sidebar.slider('Choose buying line for Rolling sharpe ratio', -0.5, 0.0, value=-0.1, step=0.1)
     returns_s4 = returns.copy()
     returns_s4["sharpe"] = rolling_sharpe(returns_s4.ret)
     returns_s4 = compute_strat_4(returns_s4, initial_capital_v2, add_capital, start_date, buy_signal)
+
+    #Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
+    returns_s5 = returns.copy()
+    returns_s5 = compute_strat_5(returns_s5, returns_spy.set_index('Date'), start_date, initial_capital_v2, add_capital, 20)
 
     #st.dataframe(returns_s3)
 
@@ -92,8 +103,11 @@ def main():
     df_total['ret_s2'] = returns_s2.ret
     df_total['ret_s3'] = returns_s3.ret
     df_total['ret_s4'] = returns_s4.ret
-    fig = prepare_full_graph(df_total)
+    df_total['ret_s5'] = returns_s5.ret
+
+    fig = prepare_full_graph_simple_strats(df_total)
     st.plotly_chart(fig, use_container_width=True)
+    st.caption('Benchmark is SPY')
 
     risk_free_return = 2.5
 
@@ -125,6 +139,12 @@ def main():
     fig = px.line(returns_s3, x="date", y='buy')
     st.plotly_chart(fig, use_container_width=False)
 
+    st.markdown('#### Complex strategies comparison')
+
+    fig = prepare_full_graph_complex_strats(df_total)
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption('Benchmark is SPY')
+
     st.markdown('#### Strategy 4: Buy everytime rolling sharpe cycles lower')
     st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6')
     mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy', 'sell'], axis=1))
@@ -142,8 +162,28 @@ def main():
     fig = px.line(returns_s4, x="date", y=['buy', 'sell'])
     st.plotly_chart(fig, use_container_width=False)
 
-def prepare_full_graph(df):
-    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3', 'ret_s4'])
+    st.markdown('#### Strategy 5: Buy everytime vol is low and sell when high vol')
+    st.markdown('After an initial capital investment, we add capital every month when spy vol is low and we take capital every month when vol is at an extreme')
+    mean, stdev = portfolio_info(returns_s5.drop(['buy', 'std'], axis=1))
+    st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+    st.markdown('##### Volatility graph for SPY')
+    fig = px.line(returns_s5, x="date", y='std')
+    st.plotly_chart(fig, use_container_width=False)
+
+    st.markdown('##### Buy&Sell signals for Strat 5')
+    fig = px.line(returns_s5, x="date", y='buy')
+    fig.add_hrect(y0=0, y1=1, line_width=0, fillcolor="green", opacity=0.2)
+    fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
+    st.plotly_chart(fig, use_container_width=False)
+
+
+def prepare_full_graph_simple_strats(df):
+    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3'])
+
+def prepare_full_graph_complex_strats(df):
+    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s4', 'ret_s5'])
 
 def portfolio_info(stocks):
 
@@ -237,7 +277,7 @@ def compute_strat_4(df, capital, add_capital, start_date, buy):
             add  = True
         if add: df.at[idx,'buy'] = 1
         if (row.sharpe > sell) and (row.date > date_to_take):
-            capital *= 0.98 #we take 2% of benefits
+            capital *= 0.95 #we take 2% of benefits
             date_to_take = row['date'] + datetime.timedelta(days=90)
             take = True
         if take: df.at[idx,'sell'] = 1
@@ -247,6 +287,47 @@ def compute_strat_4(df, capital, add_capital, start_date, buy):
         take = False
 
     return df
+
+def compute_strat_5(df, spy, start_date, capital, add_capital, window):
+    date_to_add = start_date + datetime.timedelta(days=30)
+    date_to_take = start_date + datetime.timedelta(days=30)
+    
+    spy = compute_spy_vol((spy.pct_change()), window)
+
+    df['buy'] = spy['buy'].values
+    df['std'] = spy['std'].values
+
+    for idx, row in df.iterrows():
+        if (row.buy == 1) and (row.date > date_to_add): 
+            capital += add_capital            
+            date_to_add = row['date'] + datetime.timedelta(days=30)
+        elif (row.buy == -1) and (row.date > date_to_take):
+            capital *= 0.98
+            date_to_take = row['date'] + datetime.timedelta(days=30)
+        df.at[idx,'ret'] *= capital
+    return df
+
+def compute_spy_vol(df, window):
+    df['std'], std_avg = compute_rolling_std(df, window)
+    df['buy'] = 0
+    #print(df['std'].values)  
+
+    for idx, row in df.iterrows():
+        if row['std']*1.5 > std_avg: df.at[idx,'buy'] = -1
+        elif row['std']*0.8 < std_avg: df.at[idx,'buy'] = 1
+        else: df.at[idx,'buy'] = 0  
+    return df
+
+def compute_rolling_std(df, window):
+    #Generate rolling comparison between pairs:
+    std_1 = [] #dax
+    i = 0
+    while i < len(df):
+        if i < window: std_1.append(0)
+        else:
+            std_1.append(np.std(df.SPY[i-window:i]))
+        i += 1
+    return std_1, np.mean(np.array(std_1))
 
 
 
