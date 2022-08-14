@@ -6,12 +6,14 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+import datetime
+
 #Ignore warnings
 import warnings
 warnings.filterwarnings("ignore")
 
+# import quant finance libraries
 import yfinance as yf
-import datetime
 
 def main():
 
@@ -109,35 +111,78 @@ def main():
     st.plotly_chart(fig, use_container_width=True)
     st.caption('Benchmark is SPY')
 
+    df_ret = returns_s2.set_index('date')
+    df_ret['ret_pct'] = df_ret.ret.pct_change()
+    df_ret.drop(['ret'], axis=1, inplace=True)
+    df_ret = df_ret.resample('MS').sum()
+    df_ret.reset_index(inplace=True)
+    df_ret['year'] = df_ret['date'].dt.year
+
+    month = {
+                1:"Jan",
+                2:"Feb",
+                3:"Mar",
+                4:"Apr",
+                5:"May",
+                6:"Jun",
+                7:"Jul",
+                8:"Aug",
+                9:"Sep",
+                10:"Oct",
+                11:"Nov",
+                12:"Dec"
+    }
+
+
+    df_ret['month'] = df_ret['date'].dt.month
+    
+    print(df_ret.head(10))
+    df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
+                    columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
+
+    df_table.rename(columns=month, inplace=True)
+
+    df_table['YTD'] = df_table.sum(axis=1)
+
+    st.write("Table with monthly returns if using Strategy 2: ")
+
+    def style_negative(v, props=''):
+        return props if v < 0 else None
+
+    st.table(df_table.applymap('{:,.2%}'.format))
+
+    # Adding details section so main screen is less convoluted
     risk_free_return = 2.5
 
-    st.markdown('#### Strategy 1: Buy and hold')
-    st.markdown('Basic strategy that buys 50K from the period chosen and holds until today')
-    mean, stdev = portfolio_info(returns_s1)
-    st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+    with st.expander("See detailed data per strategy"):
 
-    st.markdown('#### Strategy 2: Buy every 3 months')
-    st.markdown('After an initial capital investment, we add capital every 3 months')
-    mean, stdev = portfolio_info(returns_s2)
-    st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+        st.markdown('#### Strategy 1: Buy and hold')
+        st.markdown('Basic strategy that buys 50K from the period chosen and holds until today')
+        mean, stdev = portfolio_info(returns_s1)
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
-    st.markdown('#### Strategy 3: Buy after every month when RSI < 35')
-    st.markdown('After an initial capital investment, we add capital every month when RSI is lower than 35 or we wait until that happens')
-    mean, stdev = portfolio_info(returns_s3.drop(['rsi', 'buy'], axis=1))
-    st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+        st.markdown('#### Strategy 2: Buy every 3 months')
+        st.markdown('After an initial capital investment, we add capital every 3 months')
+        mean, stdev = portfolio_info(returns_s2)
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
-    st.markdown('##### RSI graph')
-    fig = px.line(returns_s3, x="date", y='rsi')
-    fig.add_hline(y=35, line_color="green", line_dash="dash")
-    st.plotly_chart(fig, use_container_width=False)
-    st.write('Last RSI data point is {}'.format(returns_s3.rsi[-1:].values))
+        st.markdown('#### Strategy 3: Buy after every month when RSI < 35')
+        st.markdown('After an initial capital investment, we add capital every month when RSI is lower than 35 or we wait until that happens')
+        mean, stdev = portfolio_info(returns_s3.drop(['rsi', 'buy'], axis=1))
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
-    st.markdown('##### Buy signals for Strat 3')
-    fig = px.line(returns_s3, x="date", y='buy')
-    st.plotly_chart(fig, use_container_width=False)
+        st.markdown('##### RSI graph')
+        fig = px.line(returns_s3, x="date", y='rsi')
+        fig.add_hline(y=35, line_color="green", line_dash="dash")
+        st.plotly_chart(fig, use_container_width=False)
+        st.write('Last RSI data point is {}'.format(returns_s3.rsi[-1:].values))
+
+        st.markdown('##### Buy signals for Strat 3')
+        fig = px.line(returns_s3, x="date", y='buy')
+        st.plotly_chart(fig, use_container_width=False)
 
     st.markdown('#### Complex strategies comparison')
 
@@ -145,38 +190,41 @@ def main():
     st.plotly_chart(fig, use_container_width=True)
     st.caption('Benchmark is SPY')
 
-    st.markdown('#### Strategy 4: Buy everytime rolling sharpe cycles lower')
-    st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6')
-    mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy', 'sell'], axis=1))
-    st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
-    st.markdown('##### Rolling sharpe graph')
-    fig = px.line(returns_s4, x="date", y='sharpe')
-    fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
-    fig.add_hline(y=0.6, line_color="red", line_dash="dash")
-    st.plotly_chart(fig, use_container_width=False)
-    st.write('Last rolling sharpe data point is {}'.format(returns_s4.sharpe[-1:].values))
+    with st.expander("See detailed data per strategy"):
 
-    st.markdown('##### Buy & Sell signals for Strat 4')
-    fig = px.line(returns_s4, x="date", y=['buy', 'sell'])
-    st.plotly_chart(fig, use_container_width=False)
+        st.markdown('#### Strategy 4: Buy everytime rolling sharpe cycles lower')
+        st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6')
+        mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy', 'sell'], axis=1))
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
-    st.markdown('#### Strategy 5: Buy everytime vol is low and sell when high vol')
-    st.markdown('After an initial capital investment, we add capital every month when spy vol is low and we take capital every month when vol is at an extreme')
-    mean, stdev = portfolio_info(returns_s5.drop(['buy', 'std'], axis=1))
-    st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-    st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+        st.markdown('##### Rolling sharpe graph')
+        fig = px.line(returns_s4, x="date", y='sharpe')
+        fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
+        fig.add_hline(y=0.6, line_color="red", line_dash="dash")
+        st.plotly_chart(fig, use_container_width=False)
+        st.write('Last rolling sharpe data point is {}'.format(returns_s4.sharpe[-1:].values))
 
-    st.markdown('##### Volatility graph for SPY')
-    fig = px.line(returns_s5, x="date", y='std')
-    st.plotly_chart(fig, use_container_width=False)
+        st.markdown('##### Buy & Sell signals for Strat 4')
+        fig = px.line(returns_s4, x="date", y=['buy', 'sell'])
+        st.plotly_chart(fig, use_container_width=False)
 
-    st.markdown('##### Buy&Sell signals for Strat 5')
-    fig = px.line(returns_s5, x="date", y='buy')
-    fig.add_hrect(y0=0, y1=1, line_width=0, fillcolor="green", opacity=0.2)
-    fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
-    st.plotly_chart(fig, use_container_width=False)
+        st.markdown('#### Strategy 5: Buy everytime vol is low and sell when high vol')
+        st.markdown('After an initial capital investment, we add capital every month when spy vol is low and we take capital every month when vol is at an extreme')
+        mean, stdev = portfolio_info(returns_s5.drop(['buy', 'std'], axis=1))
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+        st.markdown('##### Volatility graph for SPY')
+        fig = px.line(returns_s5, x="date", y='std')
+        st.plotly_chart(fig, use_container_width=False)
+
+        st.markdown('##### Buy&Sell signals for Strat 5')
+        fig = px.line(returns_s5, x="date", y='buy')
+        fig.add_hrect(y0=0, y1=1, line_width=0, fillcolor="green", opacity=0.2)
+        fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
+        st.plotly_chart(fig, use_container_width=False)
 
 
 def prepare_full_graph_simple_strats(df):
@@ -328,8 +376,6 @@ def compute_rolling_std(df, window):
             std_1.append(np.std(df.SPY[i-window:i]))
         i += 1
     return std_1, np.mean(np.array(std_1))
-
-
 
 if __name__=='__main__':
     main()
