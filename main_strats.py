@@ -40,7 +40,7 @@ def main():
     portfolio = st.selectbox('Choose portfolio to analyze', ['My portfolio', 'Other'])
     if portfolio == 'My portfolio':
         stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
-                'bac', 'regn', 'msft', 'team', 'fb', 'or.pa', 'atvi', 'gdx']
+                'bac', 'regn', 'msft', 'team', 'meta', 'or.pa', 'atvi', 'gdx']
     else:
         st.markdown("Put stock tickets separated by commas without spaces")
         sl = st.text_input('Stock list:')
@@ -67,8 +67,8 @@ def main():
     returns_spy = (1 + spy.pct_change()[1:]).cumprod().reset_index()
     returns.rename(columns={'Date':'date', 0:'ret'}, inplace=True)
 
-    initial_capital_s1 = st.sidebar.slider('Choose initial capital for strat 1', 10000, 100000, value=50000, step=10000)
-    initial_capital_v2 = st.sidebar.slider('Choose initial capital for other strats', 10000, 100000, value=20000, step=10000)
+    initial_capital_s1 = st.sidebar.slider('Choose initial capital for B&H', 10000, 100000, value=50000, step=10000)
+    initial_capital_v2 = st.sidebar.slider('Choose initial capital for incremental strats', 10000, 100000, value=20000, step=10000)
     add_capital = st.sidebar.slider('Choose amount to periodically add', 1000, 5000, value=1000, step=500)
     returns_spy['SPY'] = initial_capital_s1 * returns_spy.SPY
 
@@ -97,6 +97,18 @@ def main():
     returns_s5 = returns.copy()
     returns_s5 = compute_strat_5(returns_s5, returns_spy.set_index('Date'), start_date, initial_capital_v2, add_capital, 20)
 
+    #Strategy 6: Pairs trading
+    df_pairs = get_data(['qqq', 'iwm'], start_date = start_date, end_date = "2022-12-31")
+    df_pairs = df_pairs[['Adj Close', 'Volume']]
+    returns_s6 = compute_strat_6(df_pairs, initial_capital_s1, 20)
+    returns_s6.reset_index(inplace=True)
+    returns_s6.rename(columns={'Date':'date', 'ret':'ret_s6'}, inplace=True)
+
+    #Strategy 7: RSI & EMA cross over
+
+
+    #Strategy 8: Risk Parity and using pairs trading methods
+
     #st.dataframe(returns_s3)
 
     # Call plotly figures
@@ -106,6 +118,7 @@ def main():
     df_total['ret_s3'] = returns_s3.ret
     df_total['ret_s4'] = returns_s4.ret
     df_total['ret_s5'] = returns_s5.ret
+    df_total = pd.merge(df_total, returns_s6[['date', 'ret_s6']], how='left', on='date')
 
     fig = prepare_full_graph_simple_strats(df_total)
     st.plotly_chart(fig, use_container_width=True)
@@ -136,7 +149,6 @@ def main():
 
     df_ret['month'] = df_ret['date'].dt.month
     
-    print(df_ret.head(10))
     df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
                     columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
 
@@ -190,6 +202,45 @@ def main():
     st.plotly_chart(fig, use_container_width=True)
     st.caption('Benchmark is SPY')
 
+    df_ret = returns_s4.set_index('date')
+    df_ret['ret_pct'] = df_ret.ret.pct_change()
+    df_ret.drop(['ret'], axis=1, inplace=True)
+    df_ret = df_ret.resample('MS').sum()
+    df_ret.reset_index(inplace=True)
+    df_ret['year'] = df_ret['date'].dt.year
+
+    month = {
+                1:"Jan",
+                2:"Feb",
+                3:"Mar",
+                4:"Apr",
+                5:"May",
+                6:"Jun",
+                7:"Jul",
+                8:"Aug",
+                9:"Sep",
+                10:"Oct",
+                11:"Nov",
+                12:"Dec"
+    }
+
+
+    df_ret['month'] = df_ret['date'].dt.month
+    
+    df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
+                    columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
+
+    df_table.rename(columns=month, inplace=True)
+
+    df_table['YTD'] = df_table.sum(axis=1)
+
+    st.write("Table with monthly returns if using Strategy 4: ")
+
+    def style_negative(v, props=''):
+        return props if v < 0 else None
+
+    st.table(df_table.applymap('{:,.2%}'.format))
+
 
     with st.expander("See detailed data per strategy"):
 
@@ -226,12 +277,28 @@ def main():
         fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
         st.plotly_chart(fig, use_container_width=False)
 
+        st.markdown('#### Strategy 6: Using Pairs trading to shifts weights between QQQ and IWM')
+        st.markdown('The main idea of this strat is to keep changing weights between QQQ and IWM depending the strenght of each index')
+        mean, stdev = portfolio_info(returns_s6.drop(['QQQ_weight', 'QQQ', 'IWM_weight', 'IWM', 'ratio', 'mean_vol_pct_change'], axis=1))
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+        st.markdown('##### Ratio graph for IWM / QQQ')
+        fig = px.line(returns_s6, x="date", y=['ratio', 'mean_vol_pct_change'])
+        st.plotly_chart(fig, use_container_width=False)
+        st.write('Mean volume for last 90 days is {}'.format(returns_s6['mean_vol_pct_change'][-1:].values))
+        st.write('Ratio between QQQ and IWM at {}'.format(returns_s6['ratio'][-1:].values))
+
+        st.markdown('##### Weights for IWM / QQQ')
+        fig = px.line(returns_s6, x="date", y=['QQQ_weight', 'IWM_weight'])
+        st.plotly_chart(fig, use_container_width=False)
+
 
 def prepare_full_graph_simple_strats(df):
     return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3'])
 
 def prepare_full_graph_complex_strats(df):
-    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s4', 'ret_s5'])
+    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s4', 'ret_s5', 'ret_s6'])
 
 def portfolio_info(stocks):
 
@@ -355,6 +422,89 @@ def compute_strat_5(df, spy, start_date, capital, add_capital, window):
         df.at[idx,'ret'] *= capital
     return df
 
+def compute_strat_6(df, capital, window):
+
+    ratio, mean_vol =  compute_ratios(df, window)
+    
+    df = df['Adj Close']
+
+    df['ratio'] = ratio
+    df['mean_vol_pct_change'] = mean_vol
+
+    df['IWM'] = df['IWM'].pct_change()
+    df['QQQ'] = df['QQQ'].pct_change()
+
+    df['QQQ_weight'] = 0.5
+    df['IWM_weight'] = 0.5
+
+    high_interval = np.mean(df.ratio) + 1*np.std(df.ratio)
+    low_interval = np.mean(df.ratio) - 1*np.std(df.ratio)
+
+    mem = 'normal'
+
+    for idx, row in df.iterrows():
+        if row.ratio > high_interval:
+            df.at[idx,'QQQ_weight'] = 0.25
+            df.at[idx,'IWM_weight'] = 0.75
+            mem = 'IWM'
+        elif row.ratio < low_interval:
+            df.at[idx,'QQQ_weight'] = 0.75
+            df.at[idx,'IWM_weight'] = 0.25
+            mem = 'qqq'
+        if mem == 'IWM':
+            df.at[idx,'QQQ_weight'] = 0.25
+            df.at[idx,'IWM_weight'] = 0.75
+        elif mem == 'qqq':
+            df.at[idx,'QQQ_weight'] = 0.75
+            df.at[idx,'IWM_weight'] = 0.25
+
+    df['ret'] = (df['QQQ'] * df['QQQ_weight']) + (df['IWM'] * df['IWM_weight'])
+    df['ret'] = (df['ret']+1).cumprod()
+    df['ret'] = df['ret'] * capital
+    return df
+
+def compute_ratios(df, window):
+    df_vol = df['Volume']
+    df_close = df['Adj Close']
+    close_change_1 = df_close['IWM'].pct_change()
+    close_change_2 = df_close['QQQ'].pct_change()
+    close_change_1 = close_change_1 + 1
+    close_change_1 = np.where(close_change_1.isna(), 0, close_change_1)
+    close_change_2 = close_change_2 + 1
+    close_change_2 = np.where(close_change_2.isna(), 0, close_change_2)
+
+    vol = df_vol['QQQ'].pct_change()
+    vol_arr = np.array(vol + 1)
+    
+    mean_vol = mean_filter1d_valid_strided(vol_arr, 90)
+    mean_vol = np.insert(mean_vol, 0, np.ones(len(vol_arr)-len(mean_vol)))
+    
+    ratio_a = []
+    ratio_b = []
+    ratio = []
+    for i in range(0, len(close_change_1)):
+        if i < window:
+            ratio_a.append(1)
+            ratio_b.append(1)
+            ratio.append(1)
+        else:
+            rr_a = np.prod(close_change_1[i-window:i])
+            rr_b = np.prod(close_change_2[i-window:i])
+            ratio_a.append(rr_a)
+            ratio_b.append(rr_b)
+            ratio.append(rr_b/rr_a)
+    return ratio, mean_vol
+
+#Computes mean given a window W and an array a
+def mean_filter1d_valid_strided(a, W):
+    return strided_app(a, W, S=1).mean(axis=1)
+
+
+def strided_app(a, L, S ):  # Window len = L, Stride len/stepsize = S
+    nrows = ((a.size-L)//S)+1
+    n = a.strides[0]
+    return np.lib.stride_tricks.as_strided(a, shape=(nrows,L), strides=(S*n,n))
+
 def compute_spy_vol(df, window):
     df['std'], std_avg = compute_rolling_std(df, window)
     df['buy'] = 0
@@ -367,8 +517,7 @@ def compute_spy_vol(df, window):
     return df
 
 def compute_rolling_std(df, window):
-    #Generate rolling comparison between pairs:
-    std_1 = [] #dax
+    std_1 = []
     i = 0
     while i < len(df):
         if i < window: std_1.append(0)
