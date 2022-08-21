@@ -109,6 +109,20 @@ def main():
 
     #Strategy 8: Risk Parity and using pairs trading methods
 
+
+    #Strategy 9: Turtle's fast system
+    returns_s9 = returns.copy()
+    returns_s9 = compute_strat_9(returns_s9, initial_capital_v2, add_capital, 20, 10)
+
+    #Strategy 10: Mix of signals
+    returns_s10 = returns.copy()
+    returns_s10['rsi'] = returns_s3['rsi'].values
+    returns_s10['buy_s4'] = returns_s4['buy'].values
+    returns_s10['sell_s4'] = returns_s4['sell'].values
+    returns_s10['buy_s9'] = returns_s9['buy'].values
+    returns_s10['sell_s9'] = returns_s9['sell'].values
+    returns_s10 = compute_strat_10(returns_s10, initial_capital_v2, add_capital, start_date)
+
     #st.dataframe(returns_s3)
 
     # Call plotly figures
@@ -119,6 +133,9 @@ def main():
     df_total['ret_s4'] = returns_s4.ret
     df_total['ret_s5'] = returns_s5.ret
     df_total = pd.merge(df_total, returns_s6[['date', 'ret_s6']], how='left', on='date')
+    df_total['ret_s9'] = returns_s9.ret
+    df_total['ret_s10'] = returns_s10.ret
+
 
     fig = prepare_full_graph_simple_strats(df_total)
     st.plotly_chart(fig, use_container_width=True)
@@ -194,6 +211,16 @@ def main():
 
         st.markdown('##### Buy signals for Strat 3')
         fig = px.line(returns_s3, x="date", y='buy')
+        st.plotly_chart(fig, use_container_width=False)
+
+        st.markdown('#### Strategy 9: Follow famous Turtle system')
+        st.markdown('After an initial capital investment, we add capital every month when price breaks 20 days high and sell every month when price break 10 days low')
+        mean, stdev = portfolio_info(returns_s9.drop(['sell', 'buy', 'EL', 'ES', 'ExL', 'ExS', 'bank'], axis=1))
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+        st.markdown('##### Buy & Sell signals for Strat 9')
+        fig = px.line(returns_s9, x="date", y=['buy', 'sell'])
         st.plotly_chart(fig, use_container_width=False)
 
     st.markdown('#### Complex strategies comparison')
@@ -293,12 +320,22 @@ def main():
         fig = px.line(returns_s6, x="date", y=['QQQ_weight', 'IWM_weight'])
         st.plotly_chart(fig, use_container_width=False)
 
+        st.markdown('#### Strategy 10: Mix of all other strategies')
+        st.markdown('Mixes signals from strategy 2, strategy 4 and strategy 9')
+        mean, stdev = portfolio_info(returns_s10[['date', 'ret']])
+        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
+        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+        st.markdown('##### Buy&Sell signals for Strat 10')
+        fig = px.line(returns_s10, x="date", y=['buy', 'sell'])
+        st.plotly_chart(fig, use_container_width=False)
+
 
 def prepare_full_graph_simple_strats(df):
-    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3'])
+    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3', 'ret_s9'])
 
 def prepare_full_graph_complex_strats(df):
-    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s4', 'ret_s5', 'ret_s6'])
+    return px.line(df, x="date", y=['benchmark', 'ret_s4', 'ret_s5', 'ret_s6', 'ret_s10'])
 
 def portfolio_info(stocks):
 
@@ -494,6 +531,80 @@ def compute_ratios(df, window):
             ratio_b.append(rr_b)
             ratio.append(rr_b/rr_a)
     return ratio, mean_vol
+
+
+def compute_strat_9(df, capital, add_capital, w_buy, w_sell):
+    '''
+    EL: Entry long position
+    ExL: exit long position
+    ES: Entry short positions
+    ExS: exit short position
+    '''
+
+    df['EL'] = df['ret'].rolling(w_buy).max()
+    df['ES'] = df['ret'].rolling(w_buy).min()
+    df['ExL'] = df['ret'].rolling(w_sell).min()
+    df['ExS'] = df['ret'].rolling(w_sell).max()
+
+    df['buy'] = 0
+    df['sell'] = 0
+
+    InTrade_Long = False
+    InTrade_Short = False
+
+    winnings = add_capital
+    df['bank'] = 0
+    bank = 0
+
+    for idx, row in df.iterrows():
+        if (row['ret'] >= row['EL']) and (InTrade_Long == False): 
+            capital += winnings
+            df.at[idx,'buy'] = 1
+            InTrade_Long = True
+            entry_price = row.ret
+        elif (row['ret'] <= row['ExL']) and (InTrade_Long == True):
+            if row['ret'] > entry_price:
+                capital = capital - winnings
+                winnings += ((row['ret'] - entry_price)*winnings)
+                bank = winnings
+            else:
+                capital = capital - (row['ret'] - entry_price)*winnings
+
+            df.at[idx,'sell'] = 1
+            InTrade_Long = False
+        df.at[idx, 'bank'] += bank
+        df.at[idx,'ret'] *= capital
+
+    df['ret'] = df['ret'] + df['bank']
+
+    return df
+
+def compute_strat_10(df, capital, add_capital, start_date):
+
+    df['buy'] = 0
+    df['sell'] = 0
+    date_to_take = start_date + datetime.timedelta(days=30)
+
+    for idx, row in df.iterrows():
+        if row['buy_s4'] == 1:
+            capital += add_capital
+            df.at[idx,'buy'] = 1
+        if row['sell_s4'] == 1:
+            capital = capital - add_capital/2
+            df.at[idx,'sell'] = 1
+        if row['buy_s9'] == 1:
+            capital += add_capital
+            df.at[idx,'buy'] = 1
+        if row['sell_s9'] == 1:
+            capital = capital - add_capital/2
+            df.at[idx,'sell'] = 1
+        if row['rsi'] > 70 and row.date > date_to_take:
+            capital = capital - add_capital
+            date_to_take = row['date'] + datetime.timedelta(days=30)
+            df.at[idx,'sell'] = 1
+        df.at[idx,'ret'] *= capital
+
+    return df
 
 #Computes mean given a window W and an array a
 def mean_filter1d_valid_strided(a, W):
