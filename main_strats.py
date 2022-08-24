@@ -229,7 +229,7 @@ def main():
     st.plotly_chart(fig, use_container_width=True)
     st.caption('Benchmark is SPY')
 
-    df_ret = returns_s4.set_index('date')
+    df_ret = returns_s10.set_index('date')
     df_ret['ret_pct'] = df_ret.ret.pct_change()
     df_ret.drop(['ret'], axis=1, inplace=True)
     df_ret = df_ret.resample('MS').sum()
@@ -261,7 +261,7 @@ def main():
 
     df_table['YTD'] = df_table.sum(axis=1)
 
-    st.write("Table with monthly returns if using Strategy 4: ")
+    st.write("Table with monthly returns if using Strategy 10: ")
 
     def style_negative(v, props=''):
         return props if v < 0 else None
@@ -584,24 +584,34 @@ def compute_strat_10(df, capital, add_capital, start_date):
     df['buy'] = 0
     df['sell'] = 0
     date_to_take = start_date + datetime.timedelta(days=30)
+    date_to_add = start_date + datetime.timedelta(days=30)
 
     for idx, row in df.iterrows():
+        # Sharpe buy and sell signals
         if row['buy_s4'] == 1:
             capital += add_capital
             df.at[idx,'buy'] = 1
         if row['sell_s4'] == 1:
             capital = capital - add_capital/2
             df.at[idx,'sell'] = 1
+
+        # Turtle system
         if row['buy_s9'] == 1:
             capital += add_capital
             df.at[idx,'buy'] = 1
         if row['sell_s9'] == 1:
             capital = capital - add_capital/2
             df.at[idx,'sell'] = 1
-        if row['rsi'] > 70 and row.date > date_to_take:
+
+        # RSI system
+        if row['rsi'] > 73 and row.date > date_to_take:
             capital = capital - add_capital
             date_to_take = row['date'] + datetime.timedelta(days=30)
             df.at[idx,'sell'] = 1
+        if row['rsi'] < 35 and row.date > date_to_add:
+            capital += add_capital
+            date_to_add = row['date'] + datetime.timedelta(days=30)
+            df.at[idx,'buy'] = 1
         df.at[idx,'ret'] *= capital
 
     return df
