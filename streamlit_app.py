@@ -230,7 +230,7 @@ def main():
             fig = px.line(returns_s9, x="date", y=['buy', 'sell'])
             st.plotly_chart(fig, use_container_width=False)
 
-        st.markdown('#### Complex strategies comparison')
+        st.markdown('#### Advanced strategies comparison')
 
         fig = prepare_full_graph_complex_strats(df_total)
         st.plotly_chart(fig, use_container_width=True)
