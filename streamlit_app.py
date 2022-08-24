@@ -29,6 +29,8 @@ def main():
                 'It follows the naive principal of having an equal-weighted portfolio and each time you add to the portfolio, you are adding equally to all positions. '
                 
     )
+    st.markdown("You can also use it to simulate the performance of made-up portfolios.")
+    st.markdown("My portfolio consist of a mix of US and spanish stocks and I try to keep it at less than 20. It changes every 3 to 6 months.")
     st.sidebar.caption('Last update: Aug 2022')
     start_date = st.sidebar.date_input(
      "Choose Intial date",
@@ -42,293 +44,298 @@ def main():
         stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
                 'bac', 'regn', 'msft', 'team', 'meta', 'or.pa', 'atvi', 'gdx']
     else:
-        st.markdown("Put stock tickets separated by commas without spaces")
+        st.markdown("Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)")
         sl = st.text_input('Stock list:')
         stocks = sl.split(",")
 
-    stocks.append('spy')
-    stocks.sort()
-    total_stocks = len(stocks) - 1
-    weight = [1/total_stocks]*total_stocks 
- 
-    #Get data
-    @st.cache
-    def get_data(stocks, start_date, end_date):
-        return yf.download(stocks, start = start_date, end = end_date)
+    if stocks[0] == '':
+        st.write("Waiting stock tickets inputs...")
+    else:
+        stocks.sort()
+        total_stocks = len(stocks)
+        weight = [1/total_stocks]*total_stocks 
     
-    df = get_data(stocks, start_date = start_date, end_date = "2022-12-31")
-    df = df['Adj Close']
-    spy = df.pop('SPY')
-    
-    st.markdown('#### Simple strategies comparison')
+        #Get data
+        @st.cache
+        def get_data(stocks, start_date, end_date):
+            return yf.download(stocks, start = start_date, end = end_date)
+        
+        df = get_data(stocks, start_date = start_date, end_date = "2022-12-31")
+        df = df['Adj Close']
+        spy = get_data('spy', start_date = start_date, end_date = "2022-12-31")
+        spy = spy[['Adj Close']]
+        spy.rename(columns={'Adj Close':'SPY'}, inplace=True)
+        
+        st.markdown('#### Simple strategies comparison')
 
-    #call cumulative returns
-    returns = cum_returns(df, weight).reset_index()
-    returns_spy = (1 + spy.pct_change()[1:]).cumprod().reset_index()
-    returns.rename(columns={'Date':'date', 0:'ret'}, inplace=True)
+        #call cumulative returns
+        returns = cum_returns(df, weight).reset_index()
+        returns_spy = (1 + spy.pct_change()[1:]).cumprod().reset_index()
+        returns.rename(columns={'Date':'date', 0:'ret'}, inplace=True)
 
-    initial_capital_s1 = st.sidebar.slider('Choose initial capital for B&H', 10000, 100000, value=50000, step=10000)
-    initial_capital_v2 = st.sidebar.slider('Choose initial capital for incremental strats', 10000, 100000, value=20000, step=10000)
-    add_capital = st.sidebar.slider('Choose amount to periodically add', 1000, 5000, value=1000, step=500)
-    returns_spy['SPY'] = initial_capital_s1 * returns_spy.SPY
+        initial_capital_s1 = st.sidebar.slider('Choose initial capital for B&H', 10000, 100000, value=50000, step=10000)
+        initial_capital_v2 = st.sidebar.slider('Choose initial capital for incremental strats', 10000, 100000, value=20000, step=10000)
+        add_capital = st.sidebar.slider('Choose amount to periodically add', 1000, 5000, value=1000, step=500)
+        returns_spy['SPY'] = initial_capital_s1 * returns_spy.SPY
 
-    #Strategy 1: Buy 50000 in 2019 and hold
-    returns_s1 = returns.copy()
-    returns_s1['ret'] = initial_capital_s1 * returns_s1.ret
+        #Strategy 1: Buy 50000 in 2019 and hold
+        returns_s1 = returns.copy()
+        returns_s1['ret'] = initial_capital_s1 * returns_s1.ret
 
-    #Strategy 2: Buy every 3 months
-    returns_s2 = returns.copy()
-    returns_s2 = compute_strat_2(returns_s2, initial_capital_v2, add_capital, start_date)
+        #Strategy 2: Buy every 3 months
+        returns_s2 = returns.copy()
+        returns_s2 = compute_strat_2(returns_s2, initial_capital_v2, add_capital, start_date)
 
-    #Strategy 3: Buy everytime RSI dips below 40
-    # Define our Lookback period (our sliding window)
-    window_length = st.sidebar.slider('Choose window lenght for RSI', 10, 60, value=14, step=1)
-    returns_s3 = returns.copy()
-    returns_s3 = compute_strat_3(returns_s3, initial_capital_v2, add_capital, start_date, window_length)
+        #Strategy 3: Buy everytime RSI dips below 40
+        # Define our Lookback period (our sliding window)
+        window_length = st.sidebar.slider('Choose window lenght for RSI', 10, 60, value=14, step=1)
+        returns_s3 = returns.copy()
+        returns_s3 = compute_strat_3(returns_s3, initial_capital_v2, add_capital, start_date, window_length)
 
-    #Strategy 4: Buy everytime rolling sharpe cycles lower
-    # Define our Lookback period (our sliding window)
-    buy_signal = st.sidebar.slider('Choose buying line for Rolling sharpe ratio', -0.5, 0.0, value=-0.1, step=0.1)
-    returns_s4 = returns.copy()
-    returns_s4["sharpe"] = rolling_sharpe(returns_s4.ret)
-    returns_s4 = compute_strat_4(returns_s4, initial_capital_v2, add_capital, start_date, buy_signal)
+        #Strategy 4: Buy everytime rolling sharpe cycles lower
+        # Define our Lookback period (our sliding window)
+        buy_signal = st.sidebar.slider('Choose buying line for Rolling sharpe ratio', -0.5, 0.0, value=-0.1, step=0.1)
+        returns_s4 = returns.copy()
+        returns_s4["sharpe"] = rolling_sharpe(returns_s4.ret)
+        returns_s4 = compute_strat_4(returns_s4, initial_capital_v2, add_capital, start_date, buy_signal)
 
-    #Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
-    returns_s5 = returns.copy()
-    returns_s5 = compute_strat_5(returns_s5, returns_spy.set_index('Date'), start_date, initial_capital_v2, add_capital, 20)
+        #Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
+        returns_s5 = returns.copy()
+        returns_s5 = compute_strat_5(returns_s5, returns_spy.set_index('Date'), start_date, initial_capital_v2, add_capital, 20)
 
-    #Strategy 6: Pairs trading
-    df_pairs = get_data(['qqq', 'iwm'], start_date = start_date, end_date = "2022-12-31")
-    df_pairs = df_pairs[['Adj Close', 'Volume']]
-    returns_s6 = compute_strat_6(df_pairs, initial_capital_s1, 20)
-    returns_s6.reset_index(inplace=True)
-    returns_s6.rename(columns={'Date':'date', 'ret':'ret_s6'}, inplace=True)
+        #Strategy 6: Pairs trading
+        df_pairs = get_data(['qqq', 'iwm'], start_date = start_date, end_date = "2022-12-31")
+        df_pairs = df_pairs[['Adj Close', 'Volume']]
+        returns_s6 = compute_strat_6(df_pairs, initial_capital_s1, 20)
+        returns_s6.reset_index(inplace=True)
+        returns_s6.rename(columns={'Date':'date', 'ret':'ret_s6'}, inplace=True)
 
-    #Strategy 7: RSI & EMA cross over
-
-
-    #Strategy 8: Risk Parity and using pairs trading methods
-
-
-    #Strategy 9: Turtle's fast system
-    returns_s9 = returns.copy()
-    returns_s9 = compute_strat_9(returns_s9, initial_capital_v2, add_capital, 20, 10)
-
-    #Strategy 10: Mix of signals
-    returns_s10 = returns.copy()
-    returns_s10['rsi'] = returns_s3['rsi'].values
-    returns_s10['buy_s4'] = returns_s4['buy'].values
-    returns_s10['sell_s4'] = returns_s4['sell'].values
-    returns_s10['buy_s9'] = returns_s9['buy'].values
-    returns_s10['sell_s9'] = returns_s9['sell'].values
-    returns_s10 = compute_strat_10(returns_s10, initial_capital_v2, add_capital, start_date)
-
-    #st.dataframe(returns_s3)
-
-    # Call plotly figures
-    df_total = returns_s1.copy()
-    df_total['benchmark'] = returns_spy.SPY
-    df_total['ret_s2'] = returns_s2.ret
-    df_total['ret_s3'] = returns_s3.ret
-    df_total['ret_s4'] = returns_s4.ret
-    df_total['ret_s5'] = returns_s5.ret
-    df_total = pd.merge(df_total, returns_s6[['date', 'ret_s6']], how='left', on='date')
-    df_total['ret_s9'] = returns_s9.ret
-    df_total['ret_s10'] = returns_s10.ret
+        #Strategy 7: RSI & EMA cross over
 
 
-    fig = prepare_full_graph_simple_strats(df_total)
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption('Benchmark is SPY')
-
-    df_ret = returns_s2.set_index('date')
-    df_ret['ret_pct'] = df_ret.ret.pct_change()
-    df_ret.drop(['ret'], axis=1, inplace=True)
-    df_ret = df_ret.resample('MS').sum()
-    df_ret.reset_index(inplace=True)
-    df_ret['year'] = df_ret['date'].dt.year
-
-    month = {
-                1:"Jan",
-                2:"Feb",
-                3:"Mar",
-                4:"Apr",
-                5:"May",
-                6:"Jun",
-                7:"Jul",
-                8:"Aug",
-                9:"Sep",
-                10:"Oct",
-                11:"Nov",
-                12:"Dec"
-    }
+        #Strategy 8: Risk Parity and using pairs trading methods
 
 
-    df_ret['month'] = df_ret['date'].dt.month
-    
-    df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
-                    columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
+        #Strategy 9: Turtle's fast system
+        returns_s9 = returns.copy()
+        returns_s9 = compute_strat_9(returns_s9, initial_capital_v2, add_capital, 20, 10)
 
-    df_table.rename(columns=month, inplace=True)
+        #Strategy 10: Mix of signals
+        returns_s10 = returns.copy()
+        returns_s10['rsi'] = returns_s3['rsi'].values
+        returns_s10['buy_s4'] = returns_s4['buy'].values
+        returns_s10['sell_s4'] = returns_s4['sell'].values
+        returns_s10['buy_s9'] = returns_s9['buy'].values
+        returns_s10['sell_s9'] = returns_s9['sell'].values
+        returns_s10 = compute_strat_10(returns_s10, initial_capital_v2, add_capital, start_date)
 
-    df_table['YTD'] = df_table.sum(axis=1)
+        #st.dataframe(returns_s3)
 
-    st.write("Table with monthly returns if using Strategy 2: ")
-
-    def style_negative(v, props=''):
-        return props if v < 0 else None
-
-    st.table(df_table.applymap('{:,.2%}'.format))
-
-    # Adding details section so main screen is less convoluted
-    risk_free_return = 2.5
-
-    with st.expander("See detailed data per strategy"):
-
-        st.markdown('#### Strategy 1: Buy and hold')
-        st.markdown('Basic strategy that buys 50K from the period chosen and holds until today')
-        mean, stdev = portfolio_info(returns_s1)
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
-
-        st.markdown('#### Strategy 2: Buy every 3 months')
-        st.markdown('After an initial capital investment, we add capital every 3 months')
-        mean, stdev = portfolio_info(returns_s2)
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
-
-        st.markdown('#### Strategy 3: Buy after every month when RSI < 35')
-        st.markdown('After an initial capital investment, we add capital every month when RSI is lower than 35 or we wait until that happens')
-        mean, stdev = portfolio_info(returns_s3.drop(['rsi', 'buy'], axis=1))
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
-
-        st.markdown('##### RSI graph')
-        fig = px.line(returns_s3, x="date", y='rsi')
-        fig.add_hline(y=35, line_color="green", line_dash="dash")
-        st.plotly_chart(fig, use_container_width=False)
-        st.write('Last RSI data point is {}'.format(returns_s3.rsi[-1:].values))
-
-        st.markdown('##### Buy signals for Strat 3')
-        fig = px.line(returns_s3, x="date", y='buy')
-        st.plotly_chart(fig, use_container_width=False)
-
-        st.markdown('#### Strategy 9: Follow famous Turtle system')
-        st.markdown('After an initial capital investment, we add capital every month when price breaks 20 days high and sell every month when price break 10 days low')
-        mean, stdev = portfolio_info(returns_s9.drop(['sell', 'buy', 'EL', 'ES', 'ExL', 'ExS', 'bank'], axis=1))
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
-
-        st.markdown('##### Buy & Sell signals for Strat 9')
-        fig = px.line(returns_s9, x="date", y=['buy', 'sell'])
-        st.plotly_chart(fig, use_container_width=False)
-
-    st.markdown('#### Complex strategies comparison')
-
-    fig = prepare_full_graph_complex_strats(df_total)
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption('Benchmark is SPY')
-
-    df_ret = returns_s10.set_index('date')
-    df_ret['ret_pct'] = df_ret.ret.pct_change()
-    df_ret.drop(['ret'], axis=1, inplace=True)
-    df_ret = df_ret.resample('MS').sum()
-    df_ret.reset_index(inplace=True)
-    df_ret['year'] = df_ret['date'].dt.year
-
-    month = {
-                1:"Jan",
-                2:"Feb",
-                3:"Mar",
-                4:"Apr",
-                5:"May",
-                6:"Jun",
-                7:"Jul",
-                8:"Aug",
-                9:"Sep",
-                10:"Oct",
-                11:"Nov",
-                12:"Dec"
-    }
+        # Call plotly figures
+        df_total = returns_s1.copy()
+        returns_spy.rename(columns={'Date':'date', 'SPY':'benchmark'}, inplace=True)
+        df_total = pd.merge(df_total, returns_spy[['benchmark', 'date']], how='left', on='date')
+        df_total['ret_s2'] = returns_s2.ret
+        df_total['ret_s3'] = returns_s3.ret
+        df_total['ret_s4'] = returns_s4.ret
+        df_total['ret_s5'] = returns_s5.ret
+        df_total = pd.merge(df_total, returns_s6[['date', 'ret_s6']], how='left', on='date')
+        df_total['ret_s9'] = returns_s9.ret
+        df_total['ret_s10'] = returns_s10.ret
 
 
-    df_ret['month'] = df_ret['date'].dt.month
-    
-    df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
-                    columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
+        fig = prepare_full_graph_simple_strats(df_total)
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption('Benchmark is SPY')
 
-    df_table.rename(columns=month, inplace=True)
+        df_ret = returns_s2.set_index('date')
+        df_ret['ret_pct'] = df_ret.ret.pct_change()
+        df_ret.drop(['ret'], axis=1, inplace=True)
+        df_ret = df_ret.resample('MS').sum()
+        df_ret.reset_index(inplace=True)
+        df_ret['year'] = df_ret['date'].dt.year
 
-    df_table['YTD'] = df_table.sum(axis=1)
+        month = {
+                    1:"Jan",
+                    2:"Feb",
+                    3:"Mar",
+                    4:"Apr",
+                    5:"May",
+                    6:"Jun",
+                    7:"Jul",
+                    8:"Aug",
+                    9:"Sep",
+                    10:"Oct",
+                    11:"Nov",
+                    12:"Dec"
+        }
 
-    st.write("Table with monthly returns if using Strategy 10: ")
 
-    def style_negative(v, props=''):
-        return props if v < 0 else None
+        df_ret['month'] = df_ret['date'].dt.month
+        
+        df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
+                        columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
 
-    st.table(df_table.applymap('{:,.2%}'.format))
+        df_table.rename(columns=month, inplace=True)
+
+        df_table['YTD'] = df_table.sum(axis=1)
+
+        st.write("Table with monthly returns if using Strategy 2: ")
+
+        def style_negative(v, props=''):
+            return props if v < 0 else None
+
+        st.table(df_table.applymap('{:,.2%}'.format))
+
+        # Adding details section so main screen is less convoluted
+        risk_free_return = 2.5
+
+        with st.expander("See detailed data per strategy"):
+
+            st.markdown('#### Strategy 1: Buy and hold')
+            st.markdown('Basic strategy that buys 50K from the period chosen and holds until today')
+            mean, stdev = portfolio_info(returns_s1)
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+            st.markdown('#### Strategy 2: Buy every 3 months')
+            st.markdown('After an initial capital investment, we add capital every 3 months')
+            mean, stdev = portfolio_info(returns_s2)
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+            st.markdown('#### Strategy 3: Buy after every month when RSI < 35')
+            st.markdown('After an initial capital investment, we add capital every month when RSI is lower than 35 or we wait until that happens')
+            mean, stdev = portfolio_info(returns_s3.drop(['rsi', 'buy'], axis=1))
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+            st.markdown('##### RSI graph')
+            fig = px.line(returns_s3, x="date", y='rsi')
+            fig.add_hline(y=35, line_color="green", line_dash="dash")
+            st.plotly_chart(fig, use_container_width=False)
+            st.write('Last RSI data point is {}'.format(returns_s3.rsi[-1:].values))
+
+            st.markdown('##### Buy signals for Strat 3')
+            fig = px.line(returns_s3, x="date", y='buy')
+            st.plotly_chart(fig, use_container_width=False)
+
+            st.markdown('#### Strategy 9: Follow famous Turtle system')
+            st.markdown('After an initial capital investment, we add capital every month when price breaks 20 days high and sell every month when price break 10 days low')
+            mean, stdev = portfolio_info(returns_s9.drop(['sell', 'buy', 'EL', 'ES', 'ExL', 'ExS', 'bank'], axis=1))
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+            st.markdown('##### Buy & Sell signals for Strat 9')
+            fig = px.line(returns_s9, x="date", y=['buy', 'sell'])
+            st.plotly_chart(fig, use_container_width=False)
+
+        st.markdown('#### Complex strategies comparison')
+
+        fig = prepare_full_graph_complex_strats(df_total)
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption('Benchmark is SPY')
+
+        df_ret = returns_s10.set_index('date')
+        df_ret['ret_pct'] = df_ret.ret.pct_change()
+        df_ret.drop(['ret'], axis=1, inplace=True)
+        df_ret = df_ret.resample('MS').sum()
+        df_ret.reset_index(inplace=True)
+        df_ret['year'] = df_ret['date'].dt.year
+
+        month = {
+                    1:"Jan",
+                    2:"Feb",
+                    3:"Mar",
+                    4:"Apr",
+                    5:"May",
+                    6:"Jun",
+                    7:"Jul",
+                    8:"Aug",
+                    9:"Sep",
+                    10:"Oct",
+                    11:"Nov",
+                    12:"Dec"
+        }
 
 
-    with st.expander("See detailed data per strategy"):
+        df_ret['month'] = df_ret['date'].dt.month
+        
+        df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
+                        columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
 
-        st.markdown('#### Strategy 4: Buy everytime rolling sharpe cycles lower')
-        st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6')
-        mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy', 'sell'], axis=1))
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+        df_table.rename(columns=month, inplace=True)
 
-        st.markdown('##### Rolling sharpe graph')
-        fig = px.line(returns_s4, x="date", y='sharpe')
-        fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
-        fig.add_hline(y=0.6, line_color="red", line_dash="dash")
-        st.plotly_chart(fig, use_container_width=False)
-        st.write('Last rolling sharpe data point is {}'.format(returns_s4.sharpe[-1:].values))
+        df_table['YTD'] = df_table.sum(axis=1)
 
-        st.markdown('##### Buy & Sell signals for Strat 4')
-        fig = px.line(returns_s4, x="date", y=['buy', 'sell'])
-        st.plotly_chart(fig, use_container_width=False)
+        st.write("Table with monthly returns if using Strategy 10: ")
 
-        st.markdown('#### Strategy 5: Buy everytime vol is low and sell when high vol')
-        st.markdown('After an initial capital investment, we add capital every month when spy vol is low and we take capital every month when vol is at an extreme')
-        mean, stdev = portfolio_info(returns_s5.drop(['buy', 'std'], axis=1))
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+        def style_negative(v, props=''):
+            return props if v < 0 else None
 
-        st.markdown('##### Volatility graph for SPY')
-        fig = px.line(returns_s5, x="date", y='std')
-        st.plotly_chart(fig, use_container_width=False)
+        st.table(df_table.applymap('{:,.2%}'.format))
 
-        st.markdown('##### Buy&Sell signals for Strat 5')
-        fig = px.line(returns_s5, x="date", y='buy')
-        fig.add_hrect(y0=0, y1=1, line_width=0, fillcolor="green", opacity=0.2)
-        fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
-        st.plotly_chart(fig, use_container_width=False)
 
-        st.markdown('#### Strategy 6: Using Pairs trading to shifts weights between QQQ and IWM')
-        st.markdown('The main idea of this strat is to keep changing weights between QQQ and IWM depending the strenght of each index')
-        mean, stdev = portfolio_info(returns_s6.drop(['QQQ_weight', 'QQQ', 'IWM_weight', 'IWM', 'ratio', 'mean_vol_pct_change'], axis=1))
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+        with st.expander("See detailed data per strategy"):
 
-        st.markdown('##### Ratio graph for IWM / QQQ')
-        fig = px.line(returns_s6, x="date", y=['ratio', 'mean_vol_pct_change'])
-        st.plotly_chart(fig, use_container_width=False)
-        st.write('Mean volume for last 90 days is {}'.format(returns_s6['mean_vol_pct_change'][-1:].values))
-        st.write('Ratio between QQQ and IWM at {}'.format(returns_s6['ratio'][-1:].values))
+            st.markdown('#### Strategy 4: Buy everytime rolling sharpe cycles lower')
+            st.markdown('After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6')
+            mean, stdev = portfolio_info(returns_s4.drop(['sharpe', 'buy', 'sell'], axis=1))
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
-        st.markdown('##### Weights for IWM / QQQ')
-        fig = px.line(returns_s6, x="date", y=['QQQ_weight', 'IWM_weight'])
-        st.plotly_chart(fig, use_container_width=False)
+            st.markdown('##### Rolling sharpe graph')
+            fig = px.line(returns_s4, x="date", y='sharpe')
+            fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
+            fig.add_hline(y=0.6, line_color="red", line_dash="dash")
+            st.plotly_chart(fig, use_container_width=False)
+            st.write('Last rolling sharpe data point is {}'.format(returns_s4.sharpe[-1:].values))
 
-        st.markdown('#### Strategy 10: Mix of all other strategies')
-        st.markdown('Mixes signals from strategy 2, strategy 4 and strategy 9')
-        mean, stdev = portfolio_info(returns_s10[['date', 'ret']])
-        st.write('Portfolio expected annualised return is {} and volatility is {}'.format(mean, stdev))
-        st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+            st.markdown('##### Buy & Sell signals for Strat 4')
+            fig = px.line(returns_s4, x="date", y=['buy', 'sell'])
+            st.plotly_chart(fig, use_container_width=False)
 
-        st.markdown('##### Buy&Sell signals for Strat 10')
-        fig = px.line(returns_s10, x="date", y=['buy', 'sell'])
-        st.plotly_chart(fig, use_container_width=False)
+            st.markdown('#### Strategy 5: Buy everytime vol is low and sell when high vol')
+            st.markdown('After an initial capital investment, we add capital every month when spy vol is low and we take capital every month when vol is at an extreme')
+            mean, stdev = portfolio_info(returns_s5.drop(['buy', 'std'], axis=1))
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+            st.markdown('##### Volatility graph for SPY')
+            fig = px.line(returns_s5, x="date", y='std')
+            st.plotly_chart(fig, use_container_width=False)
+
+            st.markdown('##### Buy&Sell signals for Strat 5')
+            fig = px.line(returns_s5, x="date", y='buy')
+            fig.add_hrect(y0=0, y1=1, line_width=0, fillcolor="green", opacity=0.2)
+            fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
+            st.plotly_chart(fig, use_container_width=False)
+
+            st.markdown('#### Strategy 6: Using Pairs trading to shifts weights between QQQ and IWM')
+            st.markdown('The main idea of this strat is to keep changing weights between QQQ and IWM depending the strenght of each index')
+            mean, stdev = portfolio_info(returns_s6.drop(['QQQ_weight', 'QQQ', 'IWM_weight', 'IWM', 'ratio', 'mean_vol_pct_change'], axis=1))
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+            st.markdown('##### Ratio graph for IWM / QQQ')
+            fig = px.line(returns_s6, x="date", y=['ratio', 'mean_vol_pct_change'])
+            st.plotly_chart(fig, use_container_width=False)
+            st.write('Mean volume for last 90 days is {}'.format(returns_s6['mean_vol_pct_change'][-1:].values))
+            st.write('Ratio between QQQ and IWM at {}'.format(returns_s6['ratio'][-1:].values))
+
+            st.markdown('##### Weights for IWM / QQQ')
+            fig = px.line(returns_s6, x="date", y=['QQQ_weight', 'IWM_weight'])
+            st.plotly_chart(fig, use_container_width=False)
+
+            st.markdown('#### Strategy 10: Mix of all other strategies')
+            st.markdown('Mixes signals from strategy 2, strategy 4 and strategy 9')
+            mean, stdev = portfolio_info(returns_s10[['date', 'ret']])
+            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+
+            st.markdown('##### Buy&Sell signals for Strat 10')
+            fig = px.line(returns_s10, x="date", y=['buy', 'sell'])
+            st.plotly_chart(fig, use_container_width=False)
 
 
 def prepare_full_graph_simple_strats(df):
@@ -343,7 +350,7 @@ def portfolio_info(stocks):
     mean_daily_returns = stocks.pct_change().mean()
     cov_data = stocks.pct_change().cov() 
     portfolio_return = round(np.sum(mean_daily_returns) * 252,2)
-    #calculate annualised portfolio volatility
+    #calculate annualized portfolio volatility
     portfolio_std_dev = round(np.sqrt(cov_data) * np.sqrt(252),2)
 
     return portfolio_return*100, float(portfolio_std_dev.values)*100
@@ -354,6 +361,7 @@ def rolling_sharpe(df, n = 20, risk_free = 0):
 def cum_returns(stocks, wts):
 
   weighted_returns = (wts * stocks.pct_change()[1:])
+  weighted_returns = pd.DataFrame(weighted_returns)
   port_ret = weighted_returns.sum(axis=1)
   return (port_ret + 1).cumprod() 
 
@@ -446,8 +454,14 @@ def compute_strat_5(df, spy, start_date, capital, add_capital, window):
     
     spy = compute_spy_vol((spy.pct_change()), window)
 
-    df['buy'] = spy['buy'].values
-    df['std'] = spy['std'].values
+
+    spy.drop(['SPY'], axis=1, inplace=True)
+    spy.reset_index(inplace=True)
+    spy.rename(columns={'Date':'date'}, inplace=True)
+
+    #df['buy'] = spy['buy'].values
+    #df['std'] = spy['std'].values
+    df = pd.merge(df, spy, on='date', how='left')
 
     for idx, row in df.iterrows():
         if (row.buy == 1) and (row.date > date_to_add): 
