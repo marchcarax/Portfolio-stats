@@ -127,7 +127,7 @@ def main():
         returns_s10['sell_s4'] = returns_s4['sell'].values
         returns_s10['buy_s9'] = returns_s9['buy'].values
         returns_s10['sell_s9'] = returns_s9['sell'].values
-        returns_s10 = compute_strat_10(returns_s10, initial_capital_v2, add_capital, start_date)
+        returns_s10 = compute_strat_10(returns_s10, 10000, add_capital, start_date)
 
         #st.dataframe(returns_s3)
 
