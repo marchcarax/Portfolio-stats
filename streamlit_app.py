@@ -56,7 +56,7 @@ def main():
         weight = [1/total_stocks]*total_stocks 
     
         #Get data
-        @st.cache
+        @st.cache(ttl=86000)
         def get_data(stocks, start_date, end_date):
             return yf.download(stocks, start = start_date, end = end_date)
         
