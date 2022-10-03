@@ -104,12 +104,14 @@ def main():
         returns_s5 = compute_strat_5(returns_s5, returns_spy.set_index('Date'), start_date, initial_capital_v2, add_capital, 20)
 
         #Strategy 6: Pairs trading
-        df_pairs = get_data(['qqq', 'iwm'], start_date = start_date, end_date = "2022-12-31")
-        df_pairs = df_pairs[['Adj Close', 'Volume']]
-        returns_s6 = compute_strat_6(df_pairs, initial_capital_s1, 20)
-        returns_s6.reset_index(inplace=True)
-        returns_s6.rename(columns={'Date':'date', 'ret':'ret_s6'}, inplace=True)
-
+        # change this strategy to allow any pairs
+        
+        #df_pairs = get_data(['qqq', 'iwm'], start_date = start_date, end_date = "2022-12-31")
+        #df_pairs = df_pairs[['Adj Close', 'Volume']]
+        #returns_s6 = compute_strat_6(df_pairs, initial_capital_s1, 20)
+        #returns_s6.reset_index(inplace=True)
+        #returns_s6.rename(columns={'Date':'date', 'ret':'ret_s6'}, inplace=True)
+        
         #Strategy 7: RSI & EMA cross over
 
 
@@ -139,7 +141,7 @@ def main():
         df_total['ret_s3'] = returns_s3.ret
         df_total['ret_s4'] = returns_s4.ret
         df_total['ret_s5'] = returns_s5.ret
-        df_total = pd.merge(df_total, returns_s6[['date', 'ret_s6']], how='left', on='date')
+        #df_total = pd.merge(df_total, returns_s6[['date', 'ret_s6']], how='left', on='date')
         df_total['ret_s9'] = returns_s9.ret
         df_total['ret_s10'] = returns_s10.ret
 
@@ -311,21 +313,23 @@ def main():
             fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
             st.plotly_chart(fig, use_container_width=False)
 
-            st.markdown('#### Strategy 6: Using Pairs trading to shifts weights between QQQ and IWM')
-            st.markdown('The main idea of this strat is to keep changing weights between QQQ and IWM depending the strenght of each index')
-            mean, stdev = portfolio_info(returns_s6.drop(['QQQ_weight', 'QQQ', 'IWM_weight', 'IWM', 'ratio', 'mean_vol_pct_change'], axis=1))
-            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
-            st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
+                     
+            #st.markdown('#### Strategy 6: Using Pairs trading to shifts weights between QQQ and IWM')
+            #st.markdown('The main idea of this strat is to keep changing weights between QQQ and IWM depending the strenght of each index')
+            #mean, stdev = portfolio_info(returns_s6.drop(['QQQ_weight', 'QQQ', 'IWM_weight', 'IWM', 'ratio', 'mean_vol_pct_change'], axis=1))
+            #st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
+            #st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
-            st.markdown('##### Ratio graph for IWM / QQQ')
-            fig = px.line(returns_s6, x="date", y=['ratio', 'mean_vol_pct_change'])
-            st.plotly_chart(fig, use_container_width=False)
-            st.write('Mean volume for last 90 days is {}'.format(returns_s6['mean_vol_pct_change'][-1:].values))
-            st.write('Ratio between QQQ and IWM at {}'.format(returns_s6['ratio'][-1:].values))
+            #st.markdown('##### Ratio graph for IWM / QQQ')
+            #fig = px.line(returns_s6, x="date", y=['ratio', 'mean_vol_pct_change'])
+            #st.plotly_chart(fig, use_container_width=False)
+            #st.write('Mean volume for last 90 days is {}'.format(returns_s6['mean_vol_pct_change'][-1:].values))
+            #st.write('Ratio between QQQ and IWM at {}'.format(returns_s6['ratio'][-1:].values))
 
-            st.markdown('##### Weights for IWM / QQQ')
-            fig = px.line(returns_s6, x="date", y=['QQQ_weight', 'IWM_weight'])
-            st.plotly_chart(fig, use_container_width=False)
+            #st.markdown('##### Weights for IWM / QQQ')
+            #fig = px.line(returns_s6, x="date", y=['QQQ_weight', 'IWM_weight'])
+            #st.plotly_chart(fig, use_container_width=False)
+            
 
             st.markdown('#### Strategy 10: Mix of all other strategies')
             st.markdown('Mixes signals from strategy 2, strategy 4 and strategy 9')
@@ -342,7 +346,7 @@ def prepare_full_graph_simple_strats(df):
     return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3', 'ret_s9'])
 
 def prepare_full_graph_complex_strats(df):
-    return px.line(df, x="date", y=['benchmark', 'ret_s4', 'ret_s5', 'ret_s6', 'ret_s10'])
+    return px.line(df, x="date", y=['benchmark', 'ret_s4', 'ret_s5', 'ret_s10'])
 
 def portfolio_info(stocks):
 
