@@ -42,7 +42,7 @@ def main():
     portfolio = st.selectbox('Choose portfolio to analyze', ['My portfolio', 'Other'])
     if portfolio == 'My portfolio':
         stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
-                'bac', 'regn', 'msft', 'team', 'meta', 'or.pa', 'atvi', 'gdx']
+                'azn', 'regn', 'msft', 'team', 'meta', 'or.pa', 'atvi', 'san.pa', 'tsla']
     else:
         st.markdown("Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)")
         sl = st.text_input('Stock list:')
