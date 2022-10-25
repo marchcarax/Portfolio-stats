@@ -610,7 +610,7 @@ def compute_strat_10(df, capital, add_capital, start_date):
             capital += add_capital
             df.at[idx,'buy'] = 1
         if row['sell_s4'] == 1:
-            capital = capital - add_capital/2
+            capital = capital - add_capital*0.75
             df.at[idx,'sell'] = 1
 
         # Turtle system
@@ -618,7 +618,7 @@ def compute_strat_10(df, capital, add_capital, start_date):
             capital += add_capital
             df.at[idx,'buy'] = 1
         if row['sell_s9'] == 1:
-            capital = capital - add_capital/2
+            capital = capital - add_capital*0.75
             df.at[idx,'sell'] = 1
 
         # RSI system
