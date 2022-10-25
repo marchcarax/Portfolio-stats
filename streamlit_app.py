@@ -157,6 +157,13 @@ def main():
         df_ret.reset_index(inplace=True)
         df_ret['year'] = df_ret['date'].dt.year
 
+        df_ret_spy = returns_spy.set_index('date')
+        df_ret_spy['ret_pct'] = df_ret_spy.ret.pct_change()
+        df_ret_spy.drop(['benchmark'], axis=1, inplace=True)
+        df_ret_spy = df_ret_spy.resample('MS').sum()
+        df_ret_spy.reset_index(inplace=True)
+        df_ret_spy['year'] = df_ret_spy['date'].dt.year
+
         month = {
                     1:"Jan",
                     2:"Feb",
@@ -174,13 +181,19 @@ def main():
 
 
         df_ret['month'] = df_ret['date'].dt.month
+        df_ret_spy['month'] = df_ret_spy['date'].dt.month
         
         df_table = pd.pivot_table(df_ret, values='ret_pct', index=['year'],
                         columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
+        
+        df_table_spy = pd.pivot_table(df_ret_spy, values='ret_pct', index=['year'],
+                        columns=['month'], aggfunc=np.sum, fill_value=0, sort=False)
 
         df_table.rename(columns=month, inplace=True)
+        df_table_spy.rename(columns=month, inplace=True)
 
         df_table['YTD'] = df_table.sum(axis=1)
+        df_table_spy['YTD'] = df_table_spy.sum(axis=1)
 
         st.write("Table with monthly returns if using Strategy 2: ")
 
@@ -188,7 +201,11 @@ def main():
             return props if v < 0 else None
 
         st.table(df_table.applymap('{:,.2%}'.format))
-
+        
+        st.write("Table with monthly returns vs SPY: ")
+        df_rest = df_table - df_table_spy
+        st.table(df_rest.applymap('{:,.2%}'.format))
+        
         # Adding details section so main screen is less convoluted
         risk_free_return = 2.5
 
