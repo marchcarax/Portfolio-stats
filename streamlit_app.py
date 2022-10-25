@@ -343,10 +343,10 @@ def main():
 
 
 def prepare_full_graph_simple_strats(df):
-    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3', 'ret_s9'], color_discrete_sequence=px.colors.qualitative.G10)
+    return px.line(df, x="date", y=['benchmark', 'ret', 'ret_s2', 'ret_s3', 'ret_s9'], color_discrete_sequence=px.colors.qualitative.G10, render_mode="SVG")
 
 def prepare_full_graph_complex_strats(df):
-    return px.line(df, x="date", y=['benchmark', 'ret_s4', 'ret_s5', 'ret_s10'], color_discrete_sequence=px.colors.qualitative.G10)
+    return px.line(df, x="date", y=['benchmark', 'ret_s4', 'ret_s5', 'ret_s10'], color_discrete_sequence=px.colors.qualitative.G10, render_mode="SVG")
 
 def portfolio_info(stocks):
 
