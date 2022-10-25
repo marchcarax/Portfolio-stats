@@ -158,7 +158,7 @@ def main():
         df_ret['year'] = df_ret['date'].dt.year
 
         df_ret_spy = returns_spy.set_index('date')
-        df_ret_spy['ret_pct'] = df_ret_spy.ret.pct_change()
+        df_ret_spy['ret_pct'] = df_ret_spy.benchmark.pct_change()
         df_ret_spy.drop(['benchmark'], axis=1, inplace=True)
         df_ret_spy = df_ret_spy.resample('MS').sum()
         df_ret_spy.reset_index(inplace=True)
@@ -201,7 +201,7 @@ def main():
             return props if v < 0 else None
 
         st.table(df_table.applymap('{:,.2%}'.format))
-        
+
         st.write("Table with monthly returns vs SPY: ")
         df_rest = df_table - df_table_spy
         st.table(df_rest.applymap('{:,.2%}'.format))
