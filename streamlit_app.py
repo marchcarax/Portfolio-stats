@@ -202,9 +202,9 @@ def main():
 
         st.table(df_table.applymap('{:,.2%}'.format))
 
-        st.write("Table with monthly returns vs SPY: ")
-        df_rest = df_table - df_table_spy
-        st.table(df_rest.applymap('{:,.2%}'.format))
+        with st.expander("Table with monthly returns vs SPY:"):
+            df_rest = df_table - df_table_spy
+            st.table(df_rest.applymap('{:,.2%}'.format))
         
         # Adding details section so main screen is less convoluted
         risk_free_return = 2.5
