@@ -56,8 +56,7 @@ def main():
         weight = [1/total_stocks]*total_stocks 
     
         #Get data
-        #@st.cache(ttl=86000)
-        @st.cache()
+        @st.cache(ttl=86000)
         def get_data(stocks, start_date, end_date):
             return yf.download(stocks, start = start_date, end = end_date)
         
@@ -106,6 +105,8 @@ def main():
 
         #Strategy 6: Pairs trading
         # change this strategy to allow any pairs
+        # you can re-do this strategy by putting anything vs SPY and analyzing the mean rolling returns vs each other
+        # or do a second derivative. research again how it works 
         
         #df_pairs = get_data(['qqq', 'iwm'], start_date = start_date, end_date = "2022-12-31")
         #df_pairs = df_pairs[['Adj Close', 'Volume']]
@@ -242,7 +243,7 @@ def main():
 
             st.markdown('#### Strategy 9: Follow famous Turtle system')
             st.markdown('After an initial capital investment, we add capital every month when price breaks 20 days high and sell every month when price break 10 days low')
-            mean, stdev = portfolio_info(returns_s9.drop(['sell', 'buy', 'EL', 'ES', 'ExL', 'ExS', 'bank'], axis=1))
+            mean, stdev = portfolio_info(returns_s9.drop(['sell', 'buy', 'EL', 'ES', 'ExL', 'ExS'], axis=1))
             st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
             st.write('Portfolio sharpe ratio is {0:0.2f}'.format((mean - risk_free_return)/stdev))
 
@@ -587,31 +588,29 @@ def compute_strat_9(df, capital, add_capital, w_buy, w_sell):
 
     InTrade_Long = False
     InTrade_Short = False
-
-    winnings = add_capital
-    df['bank'] = 0
     bank = 0
 
     for idx, row in df.iterrows():
-        if (row['ret'] >= row['EL']) and (InTrade_Long == False): 
-            capital += winnings
+        if (row['ret'] >= row['EL']) and (InTrade_Long == False) and (InTrade_Short == False): 
+            capital += add_capital
             df.at[idx,'buy'] = 1
             InTrade_Long = True
-            entry_price = row.ret
-        elif (row['ret'] <= row['ExL']) and (InTrade_Long == True):
-            if row['ret'] > entry_price:
-                capital = capital - winnings
-                winnings += ((row['ret'] - entry_price)*winnings)
-                bank = winnings
-            else:
-                capital = capital - (row['ret'] - entry_price)*winnings
-
+        elif (row['ret'] <= row['ExL']) and (InTrade_Long == True) and (InTrade_Short == False):
+            capital = capital - add_capital/2
             df.at[idx,'sell'] = 1
             InTrade_Long = False
-        df.at[idx, 'bank'] += bank
+        elif (row['ret'] <= row['ES']) and (InTrade_Long == False) and (InTrade_Short == False):
+            capital = capital * 0.98
+            bank = capital * 0.98
+            df.at[idx,'sell'] = 1
+            InTrade_Short = True
+        elif (row['ret'] >= row['ExS']) and (InTrade_Long == False) and (InTrade_Short == True):
+            capital += bank
+            df.at[idx,'buy'] = 1
+            InTrade_Short = False
+            bank = 0
+        
         df.at[idx,'ret'] *= capital
-
-    df['ret'] = df['ret'] + df['bank']
 
     return df
 
