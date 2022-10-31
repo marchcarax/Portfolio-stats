@@ -601,7 +601,7 @@ def compute_strat_9(df, capital, add_capital, w_buy, w_sell):
             InTrade_Long = False
         elif (row['ret'] <= row['ES']) and (InTrade_Long == False) and (InTrade_Short == False):
             capital = capital * 0.98
-            bank = capital * 0.98
+            bank = capital * 0.02
             df.at[idx,'sell'] = 1
             InTrade_Short = True
         elif (row['ret'] >= row['ExS']) and (InTrade_Long == False) and (InTrade_Short == True):
