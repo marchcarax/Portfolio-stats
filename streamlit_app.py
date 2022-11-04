@@ -41,8 +41,8 @@ def main():
     #if you have international stocks, remember to put the whole yahoo name with the dot
     portfolio = st.selectbox('Choose portfolio to analyze', ['My portfolio', 'Other'])
     if portfolio == 'My portfolio':
-        stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
-                'azn', 'regn', 'msft', 'team', 'or.pa', 'atvi', 'san.pa', 'tsla']
+        stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'ibe.mc', 'or.pa',
+                'san.pa', 'azn', 'regn', 'atvi', 'msft', 'team', 'tsla', 'googl', 'nvda', 'csx']
     else:
         st.markdown("Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)")
         sl = st.text_input('Stock list:')
