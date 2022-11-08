@@ -31,7 +31,7 @@ def main():
     )
     st.markdown("You can also use it to simulate the performance of made-up portfolios.")
     st.markdown("My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months.")
-    st.sidebar.caption('Last update: Aug 2022')
+    st.sidebar.caption('Last update: Nov 2022')
     start_date = st.sidebar.date_input(
      "Choose Intial date",
      datetime.date(2019, 1, 1))
@@ -150,6 +150,7 @@ def main():
 
         fig = prepare_full_graph_simple_strats(df_total)
         st.plotly_chart(fig, use_container_width=True)
+        st.write('Last price date is {}'.format(df_total.date[-1:].values))
         st.caption('Benchmark is SPY')
 
         df_ret = returns_s2.set_index('date')
