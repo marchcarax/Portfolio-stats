@@ -150,7 +150,7 @@ def main():
 
         fig = prepare_full_graph_simple_strats(df_total)
         st.plotly_chart(fig, use_container_width=True)
-        st.write('Last price date is {}'.format(df_total.date[-1:]))
+        st.write('Last price date is {}'.format(df_total.date[-1:].values.astype(str)))
         st.caption('Benchmark is SPY')
 
         df_ret = returns_s2.set_index('date')
