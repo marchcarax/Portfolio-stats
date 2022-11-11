@@ -199,7 +199,7 @@ def main():
         df_table['YTD'] = df_table.sum(axis=1)
         df_table_spy['YTD'] = df_table_spy.sum(axis=1)
 
-        st.write("Table with monthly returns if using Strategy 2: ")
+        st.write("Table with monthly returns: ")
 
         def style_negative(v, props=''):
             return props if v < 0 else None
