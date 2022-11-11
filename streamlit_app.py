@@ -154,7 +154,7 @@ def main():
         #st.write('Last price date is {}'.format(last_date.month,last_date.day))
         st.caption('Benchmark is SPY')
 
-        df_ret = returns_s2.set_index('date')
+        df_ret = returns_s1.set_index('date')
         df_ret['ret_pct'] = df_ret.ret.pct_change()
         df_ret.drop(['ret'], axis=1, inplace=True)
         df_ret = df_ret.resample('MS').sum()
@@ -291,12 +291,12 @@ def main():
 
         df_table['YTD'] = df_table.sum(axis=1)
 
-        st.write("Table with monthly returns if using Strategy 10: ")
+        #st.write("Table with monthly returns if using Strategy 10: ")
 
         def style_negative(v, props=''):
             return props if v < 0 else None
 
-        st.table(df_table.applymap('{:,.2%}'.format))
+        #st.table(df_table.applymap('{:,.2%}'.format))
 
 
         with st.expander("See detailed data per strategy"):
