@@ -39,10 +39,14 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    portfolio = st.selectbox('Choose portfolio to analyze', ['My portfolio', 'Other'])
+    portfolio = st.selectbox('Choose portfolio to analyze', ['My portfolio', 'Div stocks', 'Lookout stocks', 'Other'])
     if portfolio == 'My portfolio':
         stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'ibe.mc', 'or.pa',
                 'san.pa', 'azn', 'regn', 'atvi', 'msft', 'team', 'googl', 'nvda', 'csx', 'mstr']
+    elif portfolio == 'Div stocks':
+        stocks = ['ko', 'pep', 'sbux']
+    elif portfolio == 'Lookout stocks':
+        stocks = ['sq', 'mrna', 'rblx', 'dis']
     else:
         st.markdown("Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)")
         sl = st.text_input('Stock list:')
@@ -151,8 +155,8 @@ def main():
         fig = prepare_full_graph_simple_strats(df_total)
         st.plotly_chart(fig, use_container_width=True)
         #df_total['dia'] = df_total.date.day 
-        #last_date = df_total.dia[-1:].values
-        #st.write('Last price day is ', last_date)
+        last_date = df_total.date[-1:]
+        st.write('Last price day is ', last_date)
         st.caption('Benchmark is SPY')
 
         df_ret = returns_s1.set_index('date')
