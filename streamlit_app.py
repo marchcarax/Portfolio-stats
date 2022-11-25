@@ -155,8 +155,8 @@ def main():
         fig = prepare_full_graph_simple_strats(df_total)
         st.plotly_chart(fig, use_container_width=True)
         #df_total['dia'] = df_total.date.day 
-        last_date = df_total.date[-1:]
-        st.write('Last price day is ', last_date)
+        last_date = df_total.date[-1:].values
+        st.write('Last price day is ', pd.Timestamp(last_date[0]).day)
         st.caption('Benchmark is SPY')
 
         df_ret = returns_s1.set_index('date')
