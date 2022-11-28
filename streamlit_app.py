@@ -46,7 +46,7 @@ def main():
     elif portfolio == 'Div stocks':
         stocks = ['ko', 'pep', 'sbux']
     elif portfolio == 'Lookout stocks':
-        stocks = ['sq', 'mrna', 'rblx', 'dis']
+        stocks = ['sq', 'mrna', 'rblx', 'dis', 'v']
     else:
         st.markdown("Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)")
         sl = st.text_input('Stock list:')
