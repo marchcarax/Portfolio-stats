@@ -78,7 +78,7 @@ def main():
         returns.rename(columns={'Date':'date', 0:'ret'}, inplace=True)
 
         initial_capital_s1 = st.sidebar.slider('Choose initial capital for B&H', 10000, 100000, value=50000, step=10000)
-        initial_capital_v2 = st.sidebar.slider('Choose initial capital for incremental strats', 10000, 100000, value=35000, step=10000)
+        initial_capital_v2 = st.sidebar.slider('Choose initial capital for incremental strats', 10000, 100000, value=30000, step=10000)
         add_capital = st.sidebar.slider('Choose amount to periodically add', 1000, 5000, value=1000, step=500)
         returns_spy['SPY'] = initial_capital_s1 * returns_spy.SPY
 
