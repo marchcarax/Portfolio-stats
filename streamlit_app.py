@@ -374,7 +374,7 @@ def main():
                 'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
         )
         allocation, fig = efficient_frontier(df, stocks)
-        st.pyplot(fig)
+        #st.pyplot(fig)
         for symbol in stocks:
             symbol_weights = allocation.get(symbol)
             st.write("Symbol: %s, Weight: %.2f" %(symbol, symbol_weights))
