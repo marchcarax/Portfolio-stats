@@ -740,9 +740,9 @@ def efficient_frontier(df, stocks, iterations=1000):
 
     fig = plt.figure(figsize=(15,8))
     plt.scatter(vol_arr,ret_arr,c=sharpe_arr,cmap='plasma')
-    fig.colorbar(label='Sharpe Ratio')
-    fig.xlabel('Volatility')
-    fig.ylabel('Return')
+    plt.colorbar(label='Sharpe Ratio')
+    plt.xlabel('Volatility')
+    plt.ylabel('Return')
     # Add red dot for max SR
     plt.scatter(max_sr_vol,max_sr_ret,c='red',s=50,edgecolors='black')
 
