@@ -4,6 +4,7 @@ import pandas as pd
 
 # Plotting
 import plotly.express as px
+import matplotlib.pyplot as plt
 import streamlit as st
 
 import datetime
@@ -31,7 +32,7 @@ def main():
     )
     st.markdown("You can also use it to simulate the performance of made-up portfolios.")
     st.markdown("My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months.")
-    st.sidebar.caption('Last update: Nov 2022')
+    st.sidebar.caption('Last update: Dec 2022')
     start_date = st.sidebar.date_input(
      "Choose Intial date",
      datetime.date(2019, 1, 1))
@@ -46,7 +47,7 @@ def main():
     elif portfolio == 'Div stocks':
         stocks = ['ko', 'pep', 'sbux']
     elif portfolio == 'Lookout stocks':
-        stocks = ['sq', 'mrna', 'rblx', 'dis', 'v']
+        stocks = ['sq', 'mrna', 'rblx', 'dis', 'v', 'mc.pa']
     else:
         st.markdown("Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)")
         sl = st.text_input('Stock list:')
@@ -366,6 +367,16 @@ def main():
             st.markdown('##### Buy&Sell signals for Strat 10')
             fig = px.line(returns_s10, x="date", y=['buy', 'sell'])
             st.plotly_chart(fig, use_container_width=False)
+
+        st.markdown('#### What to buy')
+        st.markdown('')
+        st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
+                'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
+        )
+        allocation, fig = efficient_frontier(df)
+        st.table(allocation[:3])
+        st.pyplot(fig)
+
 
 
 def prepare_full_graph_simple_strats(df):
@@ -688,6 +699,54 @@ def compute_rolling_std(df, window):
             std_1.append(np.std(df.SPY[i-window:i]))
         i += 1
     return std_1, np.mean(np.array(std_1))
+
+def efficient_frontier(df, iterations=1000):
+    """function that calculates efficient frontier for portfolio optimization"""
+    log_ret = np.log(df/df.shift(1))
+    num_runs = iterations
+
+    all_weights = np.zeros((num_runs,len(df.columns)))
+    ret_arr = np.zeros(num_runs)
+    vol_arr = np.zeros(num_runs)
+    sharpe_arr = np.zeros(num_runs)
+
+    for ind in range(num_runs):
+
+        # Create Random Weights
+        weights = np.array(np.random.random(len(df.columns)))
+
+        # Rebalance Weights
+        weights = weights / np.sum(weights)
+
+        # Save Weights
+        all_weights[ind,:] = weights
+
+        # Expected Return
+        ret_arr[ind] = np.sum((log_ret.mean() * weights) *252)
+
+        # Expected Variance
+        vol_arr[ind] = np.sqrt(np.dot(weights.T, np.dot(log_ret.cov() * 252, weights)))
+
+        # Sharpe Ratio
+        sharpe_arr[ind] = ret_arr[ind]/vol_arr[ind]
+
+    max_sr_ret = ret_arr[sharpe_arr.argmax()]
+    max_sr_vol = vol_arr[sharpe_arr.argmax()]
+
+    allocation = [i * 100 for i in all_weights[sharpe_arr.argmax(),:] ]
+    stock_dict = dict(zip(df.columns, allocation))
+    ef_df = pd.DataFrame.from_dict(stock_dict).sort_values('allocation')
+
+    fig = plt.figure(figsize=(15,8))
+    fig = plt.scatter(vol_arr,ret_arr,c=sharpe_arr,cmap='plasma')
+    fig = plt.colorbar(label='Sharpe Ratio')
+    fig = plt.xlabel('Volatility')
+    fig = plt.ylabel('Return')
+
+    # Add red dot for max SR
+    fig = plt.scatter(max_sr_vol,max_sr_ret,c='red',s=50,edgecolors='black')
+
+    return ef_df, fig
 
 if __name__=='__main__':
     main()
