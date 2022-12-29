@@ -368,14 +368,14 @@ def main():
             fig = px.line(returns_s10, x="date", y=['buy', 'sell'])
             st.plotly_chart(fig, use_container_width=False)
 
-        st.markdown('#### What to buy')
-        st.markdown('')
-        st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
-                'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
-        )
-        allocation, fig = efficient_frontier(df)
-        st.table(allocation[:3])
-        st.pyplot(fig)
+        #st.markdown('#### What to buy')
+        #st.markdown('')
+        #st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
+        #        'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
+        #)
+        #allocation, fig = efficient_frontier(df)
+        #st.table(allocation[:3])
+        #st.pyplot(fig)
 
 
 
@@ -735,9 +735,7 @@ def efficient_frontier(df, iterations=1000):
 
     allocation = [i * 100 for i in all_weights[sharpe_arr.argmax(),:] ]
     stock_dict = dict(zip(df.columns, allocation))
-    print(stock_dict)
     ef_df = pd.DataFrame.from_dict(stock_dict)
-    print(ef_df)
 
     fig = plt.figure(figsize=(15,8))
     fig = plt.scatter(vol_arr,ret_arr,c=sharpe_arr,cmap='plasma')
