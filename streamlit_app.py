@@ -368,14 +368,19 @@ def main():
             fig = px.line(returns_s10, x="date", y=['buy', 'sell'])
             st.plotly_chart(fig, use_container_width=False)
 
-        #st.markdown('#### What to buy')
-        #st.markdown('')
-        #st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
-        #        'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
-        #)
-        #allocation, fig = efficient_frontier(df)
-        #st.table(allocation[:3])
-        #st.pyplot(fig)
+        st.markdown('#### What to buy')
+        st.markdown('')
+        st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
+                'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
+        )
+        allocation, fig = efficient_frontier(df, stocks)
+        st.pyplot(fig)
+        for symbol in stocks:
+            symbol_weights = allocation.get(symbol)
+            st.write("Symbol: %s, Weight: %.2f" %(symbol, symbol_weights))
+        df_ef = pd.DataFrame.from_dict(allocation, orient='index',
+                       columns=['weights'])
+        st.table(df_ef.sort_values('weights')[:3])
 
 
 
@@ -700,7 +705,7 @@ def compute_rolling_std(df, window):
         i += 1
     return std_1, np.mean(np.array(std_1))
 
-def efficient_frontier(df, iterations=1000):
+def efficient_frontier(df, stocks, iterations=1000):
     """function that calculates efficient frontier for portfolio optimization"""
     log_ret = np.log(df/df.shift(1))
     num_runs = iterations
@@ -713,7 +718,7 @@ def efficient_frontier(df, iterations=1000):
     for ind in range(num_runs):
 
         # Create Random Weights
-        weights = np.array(np.random.random(len(df.columns)))
+        weights = np.array(np.random.random(len(stocks)))
 
         # Rebalance Weights
         weights = weights / np.sum(weights)
@@ -734,8 +739,7 @@ def efficient_frontier(df, iterations=1000):
     max_sr_vol = vol_arr[sharpe_arr.argmax()]
 
     allocation = [i * 100 for i in all_weights[sharpe_arr.argmax(),:] ]
-    stock_dict = dict(zip(df.columns, allocation))
-    ef_df = pd.DataFrame.from_dict(stock_dict)
+    stock_dict = dict(zip(stocks, allocation))
 
     fig = plt.figure(figsize=(15,8))
     fig = plt.scatter(vol_arr,ret_arr,c=sharpe_arr,cmap='plasma')
@@ -746,7 +750,7 @@ def efficient_frontier(df, iterations=1000):
     # Add red dot for max SR
     fig = plt.scatter(max_sr_vol,max_sr_ret,c='red',s=50,edgecolors='black')
 
-    return ef_df, fig
+    return stock_dict, fig
 
 if __name__=='__main__':
     main()
