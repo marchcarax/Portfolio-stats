@@ -43,7 +43,7 @@ def main():
     portfolio = st.selectbox('Choose portfolio to analyze', ['My portfolio', 'Div stocks', 'Lookout stocks', 'Other'])
     if portfolio == 'My portfolio':
         stocks = ['eng.mc','ele.mc', 'itx.mc', 'bbva.mc', 'vid.mc', 'rep.mc', 'ibe.mc', 'or.pa',
-                'san.pa', 'azn', 'regn', 'atvi', 'msft', 'team', 'googl', 'nvda', 'csx', 'mstr']
+                'san.pa', 'azn', 'regn', 'atvi', 'msft', 'team', 'googl', 'nvda', 'csx']
     elif portfolio == 'Div stocks':
         stocks = ['ko', 'pep', 'sbux']
     elif portfolio == 'Lookout stocks':
