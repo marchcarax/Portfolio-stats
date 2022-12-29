@@ -375,12 +375,9 @@ def main():
         )
         allocation, fig = efficient_frontier(df, stocks)
         #st.pyplot(fig)
-        for symbol in stocks:
-            symbol_weights = allocation.get(symbol)
-            st.write("Symbol: %s, Weight: %.2f" %(symbol, symbol_weights))
         df_ef = pd.DataFrame.from_dict(allocation, orient='index',
                        columns=['weights'])
-        st.table(df_ef.sort_values('weights')[:3])
+        st.table(df_ef.sort_values('weights', ascending=False)[:3])
 
 
 
