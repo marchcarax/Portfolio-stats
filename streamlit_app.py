@@ -736,7 +736,8 @@ def efficient_frontier(df, iterations=1000):
     allocation = [i * 100 for i in all_weights[sharpe_arr.argmax(),:] ]
     stock_dict = dict(zip(df.columns, allocation))
     print(stock_dict)
-    ef_df = pd.DataFrame.from_dict(stock_dict).sort_values('allocation')
+    ef_df = pd.DataFrame.from_dict(stock_dict)
+    print(ef_df)
 
     fig = plt.figure(figsize=(15,8))
     fig = plt.scatter(vol_arr,ret_arr,c=sharpe_arr,cmap='plasma')
