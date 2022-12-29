@@ -3,3 +3,4 @@ plotly
 pandas
 numpy
 plotly
+matplotlib
