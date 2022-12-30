@@ -703,6 +703,7 @@ def compute_rolling_std(df, window):
         i += 1
     return std_1, np.mean(np.array(std_1))
 
+@st.cache(ttl=86000)
 def efficient_frontier(df, stocks, iterations=1000):
     """function that calculates efficient frontier for portfolio optimization"""
     log_ret = np.log(df/df.shift(1))
