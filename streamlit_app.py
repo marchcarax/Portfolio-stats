@@ -368,17 +368,19 @@ def main():
             fig = px.line(returns_s10, x="date", y=['buy', 'sell'])
             st.plotly_chart(fig, use_container_width=False)
 
-        if len(stocks) > 2:
-            st.markdown('#### What to buy')
-            st.markdown('')
-            st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
+        st.markdown('#### What to buy')
+        st.markdown('')
+        st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
                     'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
-            )
-            allocation, fig = efficient_frontier(df, stocks)
-            #st.pyplot(fig)
-            df_ef = pd.DataFrame.from_dict(allocation, orient='index',
-                        columns=['weights'])
-            st.table(df_ef.sort_values('weights', ascending=False)[:3])
+        )
+        allocation = efficient_frontier(df, stocks)
+        df_ef = pd.DataFrame.from_dict(allocation, orient='index',
+                    columns=['weights'])
+        if len(stocks) > 2:
+            n = 3
+        else:
+            n = len(stocks)
+        st.table(df_ef.sort_values('weights', ascending=False)[:n])
 
 
 
@@ -688,27 +690,30 @@ def compute_spy_vol(df, window):
     #print(df['std'].values)  
 
     for idx, row in df.iterrows():
-        if row['std']*1.5 > std_avg: df.at[idx,'buy'] = -1
-        elif row['std']*0.8 < std_avg: df.at[idx,'buy'] = 1
-        else: df.at[idx,'buy'] = 0  
+        if row['std']*1.5 > std_avg: 
+            df.at[idx,'buy'] = -1
+        elif row['std']*0.8 < std_avg: 
+            df.at[idx,'buy'] = 1
+        else: 
+            df.at[idx,'buy'] = 0  
     return df
 
 def compute_rolling_std(df, window):
     std_1 = []
     i = 0
     while i < len(df):
-        if i < window: std_1.append(0)
+        if i < window: 
+            std_1.append(0)
         else:
             std_1.append(np.std(df.SPY[i-window:i]))
         i += 1
     return std_1, np.mean(np.array(std_1))
 
-def efficient_frontier(df, stocks, iterations=1000):
+def efficient_frontier(df, stocks, num_runs=100):
     """function that calculates efficient frontier for portfolio optimization"""
     log_ret = np.log(df/df.shift(1))
-    num_runs = iterations
 
-    all_weights = np.zeros((num_runs,len(df.columns)))
+    all_weights = np.zeros((num_runs,len(stocks)))
     ret_arr = np.zeros(num_runs)
     vol_arr = np.zeros(num_runs)
     sharpe_arr = np.zeros(num_runs)
@@ -733,21 +738,10 @@ def efficient_frontier(df, stocks, iterations=1000):
         # Sharpe Ratio
         sharpe_arr[ind] = ret_arr[ind]/vol_arr[ind]
 
-    max_sr_ret = ret_arr[sharpe_arr.argmax()]
-    max_sr_vol = vol_arr[sharpe_arr.argmax()]
-
     allocation = [i * 100 for i in all_weights[sharpe_arr.argmax(),:] ]
     stock_dict = dict(zip(stocks, allocation))
 
-    fig = plt.figure(figsize=(15,8))
-    plt.scatter(vol_arr,ret_arr,c=sharpe_arr,cmap='plasma')
-    plt.colorbar(label='Sharpe Ratio')
-    plt.xlabel('Volatility')
-    plt.ylabel('Return')
-    # Add red dot for max SR
-    plt.scatter(max_sr_vol,max_sr_ret,c='red',s=50,edgecolors='black')
-
-    return stock_dict, fig
+    return stock_dict
 
 if __name__=='__main__':
     main()
