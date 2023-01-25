@@ -377,10 +377,9 @@ def main():
         df_ef = pd.DataFrame.from_dict(allocation, orient='index',
                     columns=['weights'])
         if len(stocks) > 2:
-            n = 3
+            st.table(df_ef.sort_values('weights', ascending=False)[:3])
         else:
-            n = len(stocks)
-        st.table(df_ef.sort_values('weights', ascending=False)[:n])
+            st.write("No enought stocks to create optimal portfolio.")
 
 
 
