@@ -373,10 +373,10 @@ def main():
         st.markdown('We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. '
                     'We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). '
         )
-        allocation = efficient_frontier(df, stocks)
-        df_ef = pd.DataFrame.from_dict(allocation, orient='index',
-                    columns=['weights'])
         if len(stocks) > 2:
+            allocation = efficient_frontier(df, stocks)
+            df_ef = pd.DataFrame.from_dict(allocation, orient='index',
+                    columns=['weights'])
             st.table(df_ef.sort_values('weights', ascending=False)[:3])
         else:
             st.write("No enought stocks to create optimal portfolio.")
