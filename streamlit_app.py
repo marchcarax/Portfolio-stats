@@ -377,7 +377,7 @@ def main():
             allocation = efficient_frontier(df, stocks)
             df_ef = pd.DataFrame.from_dict(allocation, orient='index',
                     columns=['weights'])
-            st.table(df_ef.sort_values('weights', ascending=False)[:3].index)
+            st.write(df_ef.sort_values('weights', ascending=False)[:3].index)
         else:
             st.write("No enought stocks to create optimal portfolio.")
 
@@ -385,7 +385,7 @@ def main():
         st.markdown('Another way to find the optimal allocation is using the optimizer function from scipy. We will use it to find the weights that mazimize the sharpe ratio ')
         if len(stocks) > 2:
             allocation = optimize_weights(df.pct_change(), 4, stocks)
-            st.table(allocation[:3].index)
+            st.write(allocation[:3].index)
         else:
             st.write("No enought stocks to create optimal portfolio.")
 
