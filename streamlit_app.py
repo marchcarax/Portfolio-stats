@@ -2,6 +2,9 @@
 import numpy as np
 import pandas as pd
 
+# optimizitation
+from scipy.optimize import minimize 
+
 # Plotting
 import plotly.express as px
 import matplotlib.pyplot as plt
@@ -32,7 +35,7 @@ def main():
     )
     st.markdown("You can also use it to simulate the performance of made-up portfolios.")
     st.markdown("My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months.")
-    st.sidebar.caption('Last update: Dec 2022')
+    st.sidebar.caption('Last update: Feb 2023')
     start_date = st.sidebar.date_input(
      "Choose Intial date",
      datetime.date(2019, 1, 1))
@@ -207,9 +210,6 @@ def main():
 
         st.write("Table with monthly returns: ")
 
-        def style_negative(v, props=''):
-            return props if v < 0 else None
-
         st.table(df_table.applymap('{:,.2%}'.format))
 
         with st.expander("Table with monthly returns vs SPY:"):
@@ -217,7 +217,7 @@ def main():
             st.table(df_rest.applymap('{:,.2%}'.format))
         
         # Adding details section so main screen is less convoluted
-        risk_free_return = 2.5
+        risk_free_return = 4
 
         with st.expander("See detailed data per strategy"):
 
@@ -378,6 +378,14 @@ def main():
             df_ef = pd.DataFrame.from_dict(allocation, orient='index',
                     columns=['weights'])
             st.table(df_ef.sort_values('weights', ascending=False)[:3])
+        else:
+            st.write("No enought stocks to create optimal portfolio.")
+
+        st.markdown('')
+        st.markdown('Another way to find the optimal allocation is using the optimizer function from scipy. We will use it to find the weights that mazimize the sharpe ratio ')
+        if len(stocks) > 2:
+            allocation = optimize_weights(df.pct_change(), 4, stocks)
+            st.table(allocation[:3])
         else:
             st.write("No enought stocks to create optimal portfolio.")
 
@@ -741,6 +749,23 @@ def efficient_frontier(df, stocks, num_runs=100):
     stock_dict = dict(zip(stocks, allocation))
 
     return stock_dict
+
+def optimize_weights(returns, risk_free_return, stock_list):
+    """finds the weights that maximize the sharpe ratio"""    
+    n = returns.shape[1]
+    initial_weights = np.ones(n) / n
+    bounds = [(0, 1) for i in range(n)]
+    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    def neg_sharpe_ratio(weights, returns, risk_free_rate):
+        portfolio_return = np.sum(returns.mean() * weights) * 252
+        portfolio_volatility = np.sqrt(np.dot(weights.T, np.dot(returns.cov() * 252, weights)))
+        sharpe_ratio = (portfolio_return - risk_free_rate) / portfolio_volatility
+        return -sharpe_ratio
+    result = minimize(fun=neg_sharpe_ratio, x0=initial_weights, args=(returns, risk_free_return), method='SLSQP', bounds=bounds, constraints=constraints)
+    optimized_weights = result.x
+    res = pd.DataFrame(data=optimized_weights , index=stock_list, columns=['res']).sort_values(by='res', ascending=False)
+    return res
+
 
 if __name__=='__main__':
     main()
