@@ -217,7 +217,7 @@ def main():
             st.table(df_rest.applymap('{:,.2%}'.format))
         
         # Adding details section so main screen is less convoluted
-        risk_free_return = 4
+        risk_free_return = 3.4
 
         with st.expander("See detailed data per strategy"):
 
