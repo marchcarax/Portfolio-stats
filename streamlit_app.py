@@ -716,6 +716,7 @@ def compute_rolling_std(df, window):
         i += 1
     return std_1, np.mean(np.array(std_1))
 
+@st.cache(ttl=604800)
 def efficient_frontier(df, stocks, num_runs=100):
     """function that calculates efficient frontier for portfolio optimization"""
     log_ret = np.log(df/df.shift(1))
@@ -750,6 +751,7 @@ def efficient_frontier(df, stocks, num_runs=100):
 
     return stock_dict
 
+@st.cache(ttl=604800)
 def optimize_weights(returns, risk_free_return, stock_list):
     """finds the weights that maximize the sharpe ratio"""    
     n = returns.shape[1]
