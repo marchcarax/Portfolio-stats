@@ -64,7 +64,7 @@ def main():
         weight = [1/total_stocks]*total_stocks 
     
         #Get data
-        @st.cache(ttl=86000)
+        @st.cache_data(ttl=86000)
         def get_data(stocks, start_date, end_date):
             return yf.download(stocks, start = start_date, end = end_date)
         
@@ -716,7 +716,7 @@ def compute_rolling_std(df, window):
         i += 1
     return std_1, np.mean(np.array(std_1))
 
-@st.cache(ttl=604800)
+@st.cache_data(ttl=604800)
 def efficient_frontier(df, stocks, num_runs=100):
     """function that calculates efficient frontier for portfolio optimization"""
     log_ret = np.log(df/df.shift(1))
@@ -751,7 +751,7 @@ def efficient_frontier(df, stocks, num_runs=100):
 
     return stock_dict
 
-@st.cache(ttl=604800)
+@st.cache_data(ttl=604800)
 def optimize_weights(returns, risk_free_return, stock_list):
     """finds the weights that maximize the sharpe ratio"""    
     n = returns.shape[1]
