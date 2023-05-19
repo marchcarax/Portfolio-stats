@@ -422,7 +422,7 @@ def compute_strat_2(df, capital, add_capital, start_date):
 
     date_to_add = start_date + datetime.timedelta(days=90)
     for index, row in df.iterrows():
-        if row.date > date_to_add:
+        if row.date > pd.to_datetime(date_to_add):
             capital += add_capital
             date_to_add += datetime.timedelta(days=90)
         df.at[index,'ret'] *= capital
@@ -462,7 +462,7 @@ def compute_strat_3(df, capital, add_capital, start_date, n):
     date_to_add = start_date + datetime.timedelta(days=30)
     add = False
     for idx, row in df.iterrows():
-        if (row.rsi < 35) and (row.date > date_to_add):
+        if (row.rsi < 35) and (row.date > pd.to_datetime(date_to_add)):
             capital += add_capital
             date_to_add = row['date'] + datetime.timedelta(days=30)
             add  = True
@@ -484,12 +484,12 @@ def compute_strat_4(df, capital, add_capital, start_date, buy):
     add = False
     take = False
     for idx, row in df.iterrows():
-        if (row.sharpe < buy) and (row.date > date_to_add):
+        if (row.sharpe < buy) and (row.date > pd.to_datetime(date_to_add)):
             capital += add_capital
             date_to_add = row['date'] + datetime.timedelta(days=30)
             add  = True
         if add: df.at[idx,'buy'] = 1
-        if (row.sharpe > sell) and (row.date > date_to_take):
+        if (row.sharpe > sell) and (row.date > pd.to_datetime(date_to_take)):
             capital *= 0.95 #we take 2% of benefits
             date_to_take = row['date'] + datetime.timedelta(days=90)
             take = True
@@ -517,10 +517,10 @@ def compute_strat_5(df, spy, start_date, capital, add_capital, window):
     df = pd.merge(df, spy, on='date', how='left')
 
     for idx, row in df.iterrows():
-        if (row.buy == 1) and (row.date > date_to_add): 
+        if (row.buy == 1) and (row.date > pd.to_datetime(date_to_add)): 
             capital += add_capital            
             date_to_add = row['date'] + datetime.timedelta(days=30)
-        elif (row.buy == -1) and (row.date > date_to_take):
+        elif (row.buy == -1) and (row.date > pd.to_datetime(date_to_take)):
             capital *= 0.98
             date_to_take = row['date'] + datetime.timedelta(days=30)
         df.at[idx,'ret'] *= capital
@@ -669,11 +669,11 @@ def compute_strat_10(df, capital, add_capital, start_date):
             df.at[idx,'sell'] = 1
 
         # RSI system
-        if row['rsi'] > 73 and row.date > date_to_take:
+        if row['rsi'] > 73 and row.date > pd.to_datetime(date_to_take):
             capital = capital - add_capital
             date_to_take = row['date'] + datetime.timedelta(days=30)
             df.at[idx,'sell'] = 1
-        if row['rsi'] < 35 and row.date > date_to_add:
+        if row['rsi'] < 35 and row.date > pd.to_datetime(date_to_add):
             capital += add_capital
             date_to_add = row['date'] + datetime.timedelta(days=30)
             df.at[idx,'buy'] = 1
