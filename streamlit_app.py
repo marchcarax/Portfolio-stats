@@ -35,7 +35,7 @@ def main():
     )
     st.markdown("You can also use it to simulate the performance of made-up portfolios.")
     st.markdown("My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months.")
-    st.sidebar.caption('Last update: Feb 2023')
+    st.sidebar.caption('Last update: May 2023')
     start_date = st.sidebar.date_input(
      "Choose Intial date",
      datetime.date(2019, 1, 1))
