@@ -35,7 +35,9 @@ def cum_returns(stocks, wts):
 
   price_data = stocks
   ret_data = price_data.pct_change()[1:]
+  #print(ret_data.head())
   weighted_returns = (wts * ret_data)
+  #print(weighted_returns.head())
   port_ret = weighted_returns.sum(axis=1)
   cumulative_ret = (port_ret + 1).cumprod()
   return cumulative_ret
@@ -193,6 +195,8 @@ def plot_rolling_sharpe_ratio(stocks, wts, n: float=20):
   plt.plot(rolling, color='r', label = 'Sharpe Ratio')
   plt.title('Portfolio Rolling Sharpe Ratio')
   plt.axhline(y = 0, color = 'b', linestyle = '--')
+  plt.axhline(y = 0.5, color = 'r', linestyle = '--')
+  plt.axhline(y = -0.4, color = 'r', linestyle = '--')
   plt.show()
   plt.savefig('figures\\rolling_sharpe_ratio.png')
 
@@ -201,6 +205,5 @@ def calculate_return_series(series: pd.Series) -> pd.Series:
   Calculates the return series of a given time series.
   The first value will always be NaN.
   """
-  shifted_series = series.shift(1, axis=0)
-  return series / shifted_series - 1
+  return series.pct_change()
 

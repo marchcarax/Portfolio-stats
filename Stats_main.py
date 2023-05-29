@@ -19,18 +19,24 @@ def main():
 
     #Portfolio composition and weight
     #if you have international stocks, remember to put the whole yahoo name with the dot
-    #stocks = ['eng.mc','ele.mc', 'kl', 'bbva.mc', 'san.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 
-    #         'open', 'regn', 'msft', 'rblx', 'fb', 'pltr', 'atvi', 'vid.mc', 'or.pa'] 
-    #stocks = ['orcl','snow','aapl', 'mrna', 'gild']
-    stocks = ['eng.mc','ele.mc','bbva.mc', 'san.mc', 'rep.mc','ibe.mc','vid.mc', 'or.pa']
-    #stocks = ['kl','csx', 'nvda','open', 'regn', 'msft', 'rblx', 'fb', 'pltr', 'atvi']
+    stocks = ['eng.mc','ele.mc', 'gdx', 'bbva.mc', 'rep.mc', 'csx', 'nvda', 'ibe.mc', 'bac',
+             'regn', 'msft', 'rblx', 'fb', 'atvi', 'vid.mc', 'or.pa', 'itx.mc', 'team'] 
+    
+    #stocks = ['btc', 'eth', 'link']
+    #stocks = ['eng.mc','ele.mc','bbva.mc', 'rep.mc','ibe.mc','vid.mc', 'or.pa', 'itx.mc']
+    #stocks = ['gdx','csx', 'nvda','bac', 'regn', 'msft', 'rblx', 'fb', 'atvi']
+    #stocks = ['googl', 'fb', 'amzn']
     stocks.sort()
     total_stocks = len(stocks)
-    weight = [1/total_stocks]*total_stocks 
+    weight = [1/total_stocks]*total_stocks
+    real_weights = [0.04, 0.07, 0.09, 0.05, 0.07, 0.05, 0.07, 0.08, 0.05, 0.04, 0.06, 0.1, 0.03, 0.06, 0.04, 0.01, 0.05, 0.03]
     linkages = ['ward', 'DBHT']
+
+    real = True
+    if real: weight = real_weights
     
     #Analysis timetable
-    start_date = "2019-01-01"
+    start_date = "2018-01-01"
     end_date = "2022-12-31"
  
     #Get data

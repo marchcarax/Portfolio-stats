@@ -1,32 +1,41 @@
-[                       0%                       ][************          25%                       ]  2 of 8 completed[************          25%                       ]  2 of 8 completed[**********************50%                       ]  4 of 8 completed[**********************62%*****                  ]  5 of 8 completed[**********************75%***********            ]  6 of 8 completed[**********************75%***********            ]  6 of 8 completed[*********************100%***********************]  8 of 8 completed
+[                       0%                       ][*****                 11%                       ]  2 of 18 completed[********              17%                       ]  3 of 18 completed[***********           22%                       ]  4 of 18 completed[*************         28%                       ]  5 of 18 completed[****************      33%                       ]  6 of 18 completed[*******************   39%                       ]  7 of 18 completed[********************* 44%                       ]  8 of 18 completed[**********************50%                       ]  9 of 18 completed[**********************56%**                     ]  10 of 18 completed[**********************61%****                   ]  11 of 18 completed[**********************67%*******                ]  12 of 18 completed[**********************72%**********             ]  13 of 18 completed[**********************78%************           ]  14 of 18 completed[**********************83%***************        ]  15 of 18 completed[**********************89%******************     ]  16 of 18 completed[**********************94%********************   ]  17 of 18 completed[*********************100%***********************]  18 of 18 completed
 ---------------------------------
-Portfolio expected annualised return is 11.0 and volatility is 21.0
-Sharpe ratio : 0.43
-Sortino ratio : 3.94
+Portfolio expected annualised return is 15.0 and volatility is 21.0
+Sharpe ratio : 0.70
+Sortino ratio : 30.14
 [*********************100%***********************]  1 of 1 completed
-[                       0%                       ][************          25%                       ]  2 of 8 completed[******************    38%                       ]  3 of 8 completed[**********************50%                       ]  4 of 8 completed[**********************62%*****                  ]  5 of 8 completed[**********************75%***********            ]  6 of 8 completed[**********************88%*****************      ]  7 of 8 completed[*********************100%***********************]  8 of 8 completed
-[                       0%                       ][************          25%                       ]  2 of 8 completed[******************    38%                       ]  3 of 8 completed[**********************50%                       ]  4 of 8 completed[**********************62%*****                  ]  5 of 8 completed[**********************75%***********            ]  6 of 8 completed[**********************88%*****************      ]  7 of 8 completed[*********************100%***********************]  8 of 8 completed
+[                       0%                       ][*****                 11%                       ]  2 of 18 completed[********              17%                       ]  3 of 18 completed[***********           22%                       ]  4 of 18 completed[*************         28%                       ]  5 of 18 completed[****************      33%                       ]  6 of 18 completed[*******************   39%                       ]  7 of 18 completed[********************* 44%                       ]  8 of 18 completed[**********************50%                       ]  9 of 18 completed[**********************56%**                     ]  10 of 18 completed[**********************61%****                   ]  11 of 18 completed[**********************67%*******                ]  12 of 18 completed[**********************72%**********             ]  13 of 18 completed[**********************78%************           ]  14 of 18 completed[**********************83%***************        ]  15 of 18 completed[**********************89%******************     ]  16 of 18 completed[**********************94%********************   ]  17 of 18 completed[*********************100%***********************]  18 of 18 completed
+[                       0%                       ][*****                 11%                       ]  2 of 18 completed[********              17%                       ]  3 of 18 completed[***********           22%                       ]  4 of 18 completed[*************         28%                       ]  5 of 18 completed[****************      33%                       ]  6 of 18 completed[*******************   39%                       ]  7 of 18 completed[********************* 44%                       ]  8 of 18 completed[**********************50%                       ]  9 of 18 completed[**********************56%**                     ]  10 of 18 completed[**********************61%****                   ]  11 of 18 completed[**********************67%*******                ]  12 of 18 completed[**********************72%**********             ]  13 of 18 completed[**********************78%************           ]  14 of 18 completed[**********************83%***************        ]  15 of 18 completed[**********************89%******************     ]  16 of 18 completed[**********************94%********************   ]  17 of 18 completed[*********************100%***********************]  18 of 18 completed
 ---------------------------------
 Portfolio efficiency analysis:
-Return with Maximum SR: 9.61
-Volality with Maximum SR: 21.15
-Max Sharpe Ratio: 0.45
+Return with Maximum SR: 12.24
+Volality with Maximum SR: 21.39
+Max Sharpe Ratio: 0.57
 Optimized allocation (in %):
-Symbol: bbva.mc, Weight: 23.25
-Symbol: ele.mc, Weight: 2.92
-Symbol: eng.mc, Weight: 1.41
-Symbol: ibe.mc, Weight: 31.96
-Symbol: or.pa, Weight: 28.79
-Symbol: rep.mc, Weight: 1.06
-Symbol: san.mc, Weight: 1.25
-Symbol: vid.mc, Weight: 9.35
+Symbol: atvi, Weight: 4.19
+Symbol: bac, Weight: 1.35
+Symbol: bbva.mc, Weight: 1.66
+Symbol: csx, Weight: 4.78
+Symbol: ele.mc, Weight: 6.45
+Symbol: eng.mc, Weight: 1.97
+Symbol: fb, Weight: 7.21
+Symbol: gdx, Weight: 1.39
+Symbol: ibe.mc, Weight: 10.15
+Symbol: itx.mc, Weight: 3.90
+Symbol: msft, Weight: 11.15
+Symbol: nvda, Weight: 9.05
+Symbol: or.pa, Weight: 0.78
+Symbol: rblx, Weight: 0.38
+Symbol: regn, Weight: 6.91
+Symbol: rep.mc, Weight: 10.81
+Symbol: team, Weight: 12.48
+Symbol: vid.mc, Weight: 5.38
 ---------------------------------
 Table displaying monthly and YTD returns:
-  Year    Jan    Feb     Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec    YTD
-------  -----  -----  ------  -----  -----  -----  -----  -----  -----  -----  -----  -----  -----
-  2019   6.85   2.75    0.5    3.69  -3.68   1.54  -3.11  -1.42   5.09   1.71   1.2    2.93  18.97
-  2020  -0.37  -6.43  -18.03   5.58   0.87   5.65  -2.79  -2.63  -3.85  -1.42  25.1    1.23  -2.28
-  2021  -3.78   8.39    2.91   1.97   5.13  -0.76  -0.09   1.38  -3.54   6.57  -6.95   6.11  17.39
-  2022  -1.11  -2.2     0      0      0      0      0      0      0      0      0      0     -3.29
-W Matrix too small 
-
+  Year    Jan    Feb     Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec     YTD
+------  -----  -----  ------  -----  -----  -----  -----  -----  -----  -----  -----  -----  ------
+  2018   3.72  -3.91   -1.25   2.97   1.7    2.03   2.46   0.54   0.06  -7.71  -0.41  -4.46   -4.83
+  2019   9.36   2.98    2.51   3.07  -6.21   7.24  -0.12  -0.02   1.48   4.32   3.32   3.93   35.86
+  2020   0.99  -2.13  -10.53  12.43   6.65   4.28   3.95   3.88  -2.97  -1.91  12.58   1.14   29.39
+  2021  -2.32   3.56    2.83   5.93   6.34   1.96   0.58   4.58  -5.2   10.29   0.05   1.96   34.03
+  2022  -6.3   -4.41    2.2   -9.2   -0.49  -8.19   4.15   0      0      0      0      0     -20.91
