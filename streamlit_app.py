@@ -39,7 +39,7 @@ def main():
     st.markdown(
         "My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months."
     )
-    st.sidebar.caption("Last update: May 2023")
+    st.sidebar.caption("Last update: Aug 2023")
     start_date = st.sidebar.date_input("Choose Intial date", datetime.date(2019, 1, 1))
 
     # Portfolio composition and weight
@@ -66,6 +66,8 @@ def main():
             "googl",
             "nvda",
             "csx",
+            "abnb",
+            "sbux"
         ]
     elif portfolio == "Div stocks":
         stocks = ["ko", "pep", "sbux"]
@@ -308,9 +310,9 @@ def main():
 
         st.markdown("#### Advanced strategies comparison")
 
-        fig = prepare_full_graph(df_total, ["benchmark", "ret_s4", "ret_s9", "ret_s10"])
+        fig = prepare_full_graph(df_total, ["ret", "ret_s4", "ret_s9", "ret_s10"])
         st.plotly_chart(fig, use_container_width=True)
-        st.caption("Benchmark is SPY")
+        st.caption("Benchmark is 50/50 portfolio")
 
         df_ret = returns_s10.set_index("date")
         df_ret["ret_pct"] = df_ret.ret.pct_change()
@@ -403,7 +405,7 @@ def main():
 
             st.markdown("#### Strategy 9: Follow famous Turtle system")
             st.markdown(
-                "After an initial capital investment, we add capital every month when price breaks 20 days high and sell every month when price break 10 days low"
+                "After an initial capital investment, we add capital every month when price breaks 20 days high and sell when price break 10 days low"
             )
             mean, stdev = portfolio_info(
                 returns_s9.drop(["sell", "buy", "EL", "ExL"], axis=1)
