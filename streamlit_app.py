@@ -39,7 +39,7 @@ def main():
     st.markdown(
         "My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months."
     )
-    st.sidebar.caption("Last update: Aug 2023")
+    st.sidebar.caption("Last update: Oct 2023")
     start_date = st.sidebar.date_input("Choose Intial date", datetime.date(2019, 1, 1))
 
     # Portfolio composition and weight
@@ -58,7 +58,6 @@ def main():
             "ibe.mc",
             "or.pa",
             "san.pa",
-            "azn",
             "regn",
             "atvi",
             "msft",
@@ -71,8 +70,8 @@ def main():
         ]
     elif portfolio == "Div stocks":
         stocks = ["ko", "pep", "sbux"]
-    elif portfolio == "Lookout stocks":
-        stocks = ["sq", "mrna", "rblx", "dis", "v", "mc.pa"]
+    elif portfolio == "M&C":
+        stocks = ["meta", "mc.pa"]
     else:
         st.markdown(
             "Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)"
