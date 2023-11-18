@@ -45,7 +45,7 @@ def main():
     # Portfolio composition and weight
     # if you have international stocks, remember to put the whole yahoo name with the dot
     portfolio = st.selectbox(
-        "Choose portfolio to analyze", ["My portfolio", "Div stocks", "M&C", "Other"]
+        "Choose portfolio to analyze", ["My portfolio", "CFC-Futures", "M&C", "Other"]
     )
     if portfolio == "My portfolio":
         stocks = [
