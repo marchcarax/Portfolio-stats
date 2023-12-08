@@ -152,14 +152,7 @@ def main():
 
         # Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
         returns_s5 = returns.copy()
-        returns_s5 = compute_strat_5(
-            returns_s5,
-            returns_spy.set_index("Date"),
-            start_date,
-            initial_capital_v2,
-            add_capital,
-            60
-        )
+        returns_s5 = compute_strat_5(returns_s5,returns_spy.set_index("Date"),start_date,initial_capital_v2,add_capital,60)
 
         # Strategy 7: RSI & EMA cross over
 
