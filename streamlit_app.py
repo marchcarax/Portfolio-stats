@@ -102,7 +102,6 @@ def main():
         spy = spy[["Adj Close"]]
         spy.rename(columns={"Adj Close": "SPY"}, inplace=True)
 
-        st.markdown("#### Simple strategies comparison")
 
         # call cumulative returns
         returns = cum_returns(df, weight).reset_index()
@@ -127,25 +126,18 @@ def main():
 
         # Strategy 3: Buy everytime RSI dips below 40
         # Define our Lookback period (our sliding window)
-        window_length = st.sidebar.slider("Choose window lenght for RSI", 10, 60, value=14, step=1)
         returns_s3 = returns.copy()
         returns_s3 = systems.compute_strat_3(
-            returns_s3, initial_capital, add_capital, start_date, window_length
+            returns_s3, initial_capital, add_capital, start_date, 21
         )
 
         # Strategy 4: Buy everytime rolling sharpe cycles lower
         # Define our Lookback period (our sliding window)
         returns_s4 = returns.copy()
         returns_s4["sharpe"] = systems.rolling_sharpe(returns_s4.ret.pct_change(), 20, 0)
-        buy_signal = st.sidebar.slider(
-            "Choose buying line for Rolling sharpe ratio", -10, 0, value=-1, step=1
-        )
-        sell_signal = st.sidebar.slider(
-            "Choose selling line for Rolling sharpe ratio", 0, 10, value=7, step=1
-        )
 
         returns_s4 = systems.compute_strat_4(
-            returns_s4, initial_capital, add_capital, start_date, buy_signal, sell_signal
+            returns_s4, initial_capital, add_capital, start_date, -2, 7
         )
 
         # Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
@@ -176,247 +168,253 @@ def main():
 
         # st.dataframe(returns_s3)
 
-        # Call plotly figures
-        df_total = returns_s1.copy()
-        returns_spy.rename(columns={"Date": "date", "SPY": "benchmark"}, inplace=True)
-        df_total = pd.merge(df_total, returns_spy[["benchmark", "date"]], how="left", on="date")
-        df_total["ret_s2"] = returns_s2.ret
-        df_total["ret_s3"] = returns_s3.ret
-        df_total["ret_s4"] = returns_s4.ret
-        #df_total["ret_s5"] = returns_s5.ret
-        df_total["ret_s9"] = returns_s9.ret
-        df_total["ret_s10"] = returns_s10.ret
+        tab1, tab2, tab3 = st.tabs(["Simple strategies", "Advanced strategies", "What to buy"])
 
-        fig = prepare_full_graph(df_total, ["benchmark", "ret", "ret_s2", "ret_s3"])
-        st.plotly_chart(fig, use_container_width=True)
-        # df_total['dia'] = df_total.date.day
-        last_date = df_total.date[-1:].values
-        st.write("Last price day is ", pd.Timestamp(last_date[0]).day)
-        st.caption("Benchmark is SPY")
+        with tab1:
 
-        df_ret = returns_s1.set_index("date")
-        df_ret["ret_pct"] = df_ret.ret.pct_change()
-        df_ret.drop(["ret"], axis=1, inplace=True)
-        df_ret = df_ret.resample("MS").sum()
-        df_ret.reset_index(inplace=True)
-        df_ret["year"] = df_ret["date"].dt.year
+            st.markdown("#### Simple strategies comparison")
+            # Call plotly figures
+            df_total = returns_s1.copy()
+            returns_spy.rename(columns={"Date": "date", "SPY": "benchmark"}, inplace=True)
+            df_total = pd.merge(df_total, returns_spy[["benchmark", "date"]], how="left", on="date")
+            df_total["ret_s2"] = returns_s2.ret
+            df_total["ret_s3"] = returns_s3.ret
+            df_total["ret_s4"] = returns_s4.ret
+            #df_total["ret_s5"] = returns_s5.ret
+            df_total["ret_s9"] = returns_s9.ret
+            df_total["ret_s10"] = returns_s10.ret
 
-        df_ret_spy = returns_spy.set_index("date")
-        df_ret_spy["ret_pct"] = df_ret_spy.benchmark.pct_change()
-        df_ret_spy.drop(["benchmark"], axis=1, inplace=True)
-        df_ret_spy = df_ret_spy.resample("MS").sum()
-        df_ret_spy.reset_index(inplace=True)
-        df_ret_spy["year"] = df_ret_spy["date"].dt.year
+            fig = prepare_full_graph(df_total, ["benchmark", "ret", "ret_s2", "ret_s3", "ret_s4"])
+            st.plotly_chart(fig, use_container_width=True)
+            # df_total['dia'] = df_total.date.day
+            last_date = df_total.date[-1:].values
+            st.write("Last price day is ", pd.Timestamp(last_date[0]).day)
+            st.caption("Benchmark is SPY")
 
-        month = {
-            1: "Jan",
-            2: "Feb",
-            3: "Mar",
-            4: "Apr",
-            5: "May",
-            6: "Jun",
-            7: "Jul",
-            8: "Aug",
-            9: "Sep",
-            10: "Oct",
-            11: "Nov",
-            12: "Dec",
-        }
+            df_ret = returns_s1.set_index("date")
+            df_ret["ret_pct"] = df_ret.ret.pct_change()
+            df_ret.drop(["ret"], axis=1, inplace=True)
+            df_ret = df_ret.resample("MS").sum()
+            df_ret.reset_index(inplace=True)
+            df_ret["year"] = df_ret["date"].dt.year
 
-        df_ret["month"] = df_ret["date"].dt.month
-        df_ret_spy["month"] = df_ret_spy["date"].dt.month
+            df_ret_spy = returns_spy.set_index("date")
+            df_ret_spy["ret_pct"] = df_ret_spy.benchmark.pct_change()
+            df_ret_spy.drop(["benchmark"], axis=1, inplace=True)
+            df_ret_spy = df_ret_spy.resample("MS").sum()
+            df_ret_spy.reset_index(inplace=True)
+            df_ret_spy["year"] = df_ret_spy["date"].dt.year
 
-        df_table = pd.pivot_table(
-            df_ret,
-            values="ret_pct",
-            index=["year"],
-            columns=["month"],
-            aggfunc=np.sum,
-            fill_value=0,
-            sort=False,
-        )
+            month = {
+                1: "Jan",
+                2: "Feb",
+                3: "Mar",
+                4: "Apr",
+                5: "May",
+                6: "Jun",
+                7: "Jul",
+                8: "Aug",
+                9: "Sep",
+                10: "Oct",
+                11: "Nov",
+                12: "Dec",
+            }
 
-        df_table_spy = pd.pivot_table(
-            df_ret_spy,
-            values="ret_pct",
-            index=["year"],
-            columns=["month"],
-            aggfunc=np.sum,
-            fill_value=0,
-            sort=False,
-        )
+            df_ret["month"] = df_ret["date"].dt.month
+            df_ret_spy["month"] = df_ret_spy["date"].dt.month
 
-        df_table.rename(columns=month, inplace=True)
-        df_table_spy.rename(columns=month, inplace=True)
-
-        df_table["YTD"] = df_table.sum(axis=1)
-        df_table_spy["YTD"] = df_table_spy.sum(axis=1)
-
-        st.write("Table with monthly returns for the portfolio (ret strategy): ")
-
-        st.table(df_table.applymap("{:,.2%}".format))
-
-        with st.expander("Table with monthly returns vs SPY:"):
-            df_rest = df_table - df_table_spy
-            st.table(df_rest.applymap("{:,.2%}".format))
-
-        # Adding details section so main screen is less convoluted
-        risk_free_rate = 0
-
-        with st.expander("See detailed data per strategy"):
-            st.markdown("#### Strategy 1: Buy and hold")
-            st.markdown("Basic strategy that buys 50K from the period chosen and holds until today")
-            mean, stdev = portfolio_info(returns_s1)
-            st.write(
-                "Portfolio expected annualized return is {} and volatility is {}".format(
-                    mean, stdev
-                )
+            df_table = pd.pivot_table(
+                df_ret,
+                values="ret_pct",
+                index=["year"],
+                columns=["month"],
+                aggfunc=np.sum,
+                fill_value=0,
+                sort=False,
             )
-            st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s1.ret.pct_change(), risk_free_rate)))
 
-            st.markdown("#### Strategy 2: Buy & sells periodically")
-            st.markdown("After an initial capital investment, we add capital every 3 months and sell every 5 months a 2% of the portfolio")
-            mean, stdev = portfolio_info(returns_s2)
-            st.write(
-                "Portfolio expected annualized return is {} and volatility is {}".format(
-                    mean, stdev
-                )
+            df_table_spy = pd.pivot_table(
+                df_ret_spy,
+                values="ret_pct",
+                index=["year"],
+                columns=["month"],
+                aggfunc=np.sum,
+                fill_value=0,
+                sort=False,
             )
-            st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s2.ret.pct_change(), risk_free_rate)))
 
-            st.markdown("#### Strategy 3: Buy after every month when RSI < 30 and sells when > 80")
+            df_table.rename(columns=month, inplace=True)
+            df_table_spy.rename(columns=month, inplace=True)
+
+            df_table["YTD"] = df_table.sum(axis=1)
+            df_table_spy["YTD"] = df_table_spy.sum(axis=1)
+
+            st.write("Table with monthly returns for the portfolio (ret strategy): ")
+
+            st.table(df_table.applymap("{:,.2%}".format))
+
+            with st.expander("Table with monthly returns vs SPY:"):
+                df_rest = df_table - df_table_spy
+                st.table(df_rest.applymap("{:,.2%}".format))
+
+            # Adding details section so main screen is less convoluted
+            risk_free_rate = 0
+
+            with st.expander("See detailed data per strategy"):
+                st.markdown("#### Strategy 1: Buy and hold")
+                st.markdown("Basic strategy that buys 50K from the period chosen and holds until today")
+                mean, stdev = portfolio_info(returns_s1)
+                st.write(
+                    "Portfolio expected annualized return is {} and volatility is {}".format(
+                        mean, stdev
+                    )
+                )
+                st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s1.ret.pct_change(), risk_free_rate)))
+
+                st.markdown("#### Strategy 2: Buy & sells periodically")
+                st.markdown("After an initial capital investment, we add capital every 3 months and sell every 5 months a 2% of the portfolio")
+                mean, stdev = portfolio_info(returns_s2)
+                st.write(
+                    "Portfolio expected annualized return is {} and volatility is {}".format(
+                        mean, stdev
+                    )
+                )
+                st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s2.ret.pct_change(), risk_free_rate)))
+
+                st.markdown("#### Strategy 3: Buy after every month when RSI < 30 and sells when > 80")
+                st.markdown(
+                    "After an initial capital investment, we add capital every month when RSI is lower than 30 and sells when above 80"
+                )
+                mean, stdev = portfolio_info(returns_s3.drop(["rsi", "buy", "sell"], axis=1))
+                st.write(
+                    "Portfolio expected annualized return is {} and volatility is {}".format(
+                        mean, stdev
+                    )
+                )
+                st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s3.ret.pct_change(), risk_free_rate)))
+
+                st.markdown("##### RSI graph")
+                fig = px.line(returns_s3, x="date", y="rsi")
+                fig.add_hline(y=30, line_color="green", line_dash="dash")
+                fig.add_hline(y=80, line_color="red", line_dash="dash")
+                st.plotly_chart(fig, use_container_width=False)
+                st.write("Last RSI data point is {}".format(returns_s3.rsi[-1:].values))
+
+                st.markdown("##### Buy signals for Strat 3")
+                fig = px.line(returns_s3, x="date", y=["buy", "sell"])
+                st.plotly_chart(fig, use_container_width=False)
+
+                st.markdown("#### Strategy 4: Buy everytime rolling sharpe cycles lower")
+                st.markdown(
+                    "After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6"
+                )
+                mean, stdev = portfolio_info(returns_s4.drop(["sharpe", "buy", "sell"], axis=1))
+                st.write(
+                    "Portfolio expected annualized return is {} and volatility is {}".format(
+                        mean, stdev
+                    )
+                )
+                st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s4.ret.pct_change(), risk_free_rate=risk_free_rate)))
+
+                st.markdown("##### Rolling sharpe graph")
+                fig = px.line(returns_s4, x="date", y="sharpe")
+                fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
+                fig.add_hline(y=sell_signal, line_color="red", line_dash="dash")
+                st.plotly_chart(fig, use_container_width=False)
+                st.write("Last rolling sharpe data point is {}".format(returns_s4.sharpe[-1:].values))
+
+                st.markdown("##### Buy & Sell signals for Strat 4")
+                fig = px.line(returns_s4, x="date", y=["buy", "sell"])
+                st.plotly_chart(fig, use_container_width=False)
+
+        with tab2:
+            st.markdown("#### Advanced strategies comparison")
+
+            fig = prepare_full_graph(df_total, ["ret", "ret_s10"])
+            st.plotly_chart(fig, use_container_width=True)
+            st.caption("Benchmark is 50/50 portfolio")
+
+            df_ret = returns_s10.set_index("date")
+            df_ret["ret_pct"] = df_ret.ret.pct_change()
+            df_ret.drop(["ret"], axis=1, inplace=True)
+            df_ret = df_ret.resample("MS").sum()
+            df_ret.reset_index(inplace=True)
+            df_ret["year"] = df_ret["date"].dt.year
+
+            month = {
+                1: "Jan",
+                2: "Feb",
+                3: "Mar",
+                4: "Apr",
+                5: "May",
+                6: "Jun",
+                7: "Jul",
+                8: "Aug",
+                9: "Sep",
+                10: "Oct",
+                11: "Nov",
+                12: "Dec",
+            }
+
+            df_ret["month"] = df_ret["date"].dt.month
+
+            df_table = pd.pivot_table(
+                df_ret,
+                values="ret_pct",
+                index=["year"],
+                columns=["month"],
+                aggfunc=np.sum,
+                fill_value=0,
+                sort=False,
+            )
+
+            df_table.rename(columns=month, inplace=True)
+
+            df_table["YTD"] = df_table.sum(axis=1)
+
+            st.write("Table with monthly returns for strategy 10: ")
+
+            st.table(df_table.applymap("{:,.2%}".format))
+
+            with st.expander("See detailed data per strategy"):
+
+                st.markdown("#### Strategy 10: Basic combination of systems")
+                st.markdown("Basic combination from strategy 3, strategy 4 & strategy 9")
+                mean, stdev = portfolio_info(returns_s10[["date", "ret"]])
+                st.write(
+                    "Portfolio expected annualized return is {} and volatility is {}".format(
+                        mean, stdev
+                    )
+                )
+                st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s10.ret.pct_change(), risk_free_rate)))
+
+                st.markdown("##### Buy&Sell signals for Strat 10")
+                fig = px.line(returns_s10, x="date", y=["buy", "sell"])
+                st.plotly_chart(fig, use_container_width=False)
+
+        with tab3:
+            st.markdown("#### What to buy")
+            st.markdown("")
             st.markdown(
-                "After an initial capital investment, we add capital every month when RSI is lower than 30 and sells when above 80"
+                "We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. "
+                "We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). "
             )
-            mean, stdev = portfolio_info(returns_s3.drop(["rsi", "buy", "sell"], axis=1))
-            st.write(
-                "Portfolio expected annualized return is {} and volatility is {}".format(
-                    mean, stdev
-                )
-            )
-            st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s3.ret.pct_change(), risk_free_rate)))
+            if len(stocks) > 2:
+                allocation = efficient_frontier(df, stocks)
+                df_ef = pd.DataFrame.from_dict(allocation, orient="index", columns=["weights"])
+                st.write(df_ef.sort_values("weights", ascending=False)[:3].index.tolist())
+            else:
+                st.write("No enought stocks to create optimal portfolio.")
 
-            st.markdown("##### RSI graph")
-            fig = px.line(returns_s3, x="date", y="rsi")
-            fig.add_hline(y=30, line_color="green", line_dash="dash")
-            fig.add_hline(y=80, line_color="red", line_dash="dash")
-            st.plotly_chart(fig, use_container_width=False)
-            st.write("Last RSI data point is {}".format(returns_s3.rsi[-1:].values))
-
-            st.markdown("##### Buy signals for Strat 3")
-            fig = px.line(returns_s3, x="date", y=["buy", "sell"])
-            st.plotly_chart(fig, use_container_width=False)
-
-
-        st.markdown("#### Advanced strategies comparison")
-
-        fig = prepare_full_graph(df_total, ["ret", "ret_s4", "ret_s10"])
-        st.plotly_chart(fig, use_container_width=True)
-        st.caption("Benchmark is 50/50 portfolio")
-
-        df_ret = returns_s10.set_index("date")
-        df_ret["ret_pct"] = df_ret.ret.pct_change()
-        df_ret.drop(["ret"], axis=1, inplace=True)
-        df_ret = df_ret.resample("MS").sum()
-        df_ret.reset_index(inplace=True)
-        df_ret["year"] = df_ret["date"].dt.year
-
-        month = {
-            1: "Jan",
-            2: "Feb",
-            3: "Mar",
-            4: "Apr",
-            5: "May",
-            6: "Jun",
-            7: "Jul",
-            8: "Aug",
-            9: "Sep",
-            10: "Oct",
-            11: "Nov",
-            12: "Dec",
-        }
-
-        df_ret["month"] = df_ret["date"].dt.month
-
-        df_table = pd.pivot_table(
-            df_ret,
-            values="ret_pct",
-            index=["year"],
-            columns=["month"],
-            aggfunc=np.sum,
-            fill_value=0,
-            sort=False,
-        )
-
-        df_table.rename(columns=month, inplace=True)
-
-        df_table["YTD"] = df_table.sum(axis=1)
-
-        st.write("Table with monthly returns for strategy 10: ")
-
-        st.table(df_table.applymap("{:,.2%}".format))
-
-        with st.expander("See detailed data per strategy"):
-            st.markdown("#### Strategy 4: Buy everytime rolling sharpe cycles lower")
+            st.markdown("")
             st.markdown(
-                "After an initial capital investment, we add capital every month when rolling Sharpe ratio cycles lower than 0 and we take capital every 3 months when sharpe ratio higher than 0.6"
+                "Another way to find the optimal allocation is using the optimizer function from scipy. We will use it to find the weights that mazimize the sharpe ratio "
             )
-            mean, stdev = portfolio_info(returns_s4.drop(["sharpe", "buy", "sell"], axis=1))
-            st.write(
-                "Portfolio expected annualized return is {} and volatility is {}".format(
-                    mean, stdev
-                )
-            )
-            st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s4.ret.pct_change(), risk_free_rate=risk_free_rate)))
-
-            st.markdown("##### Rolling sharpe graph")
-            fig = px.line(returns_s4, x="date", y="sharpe")
-            fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
-            fig.add_hline(y=sell_signal, line_color="red", line_dash="dash")
-            st.plotly_chart(fig, use_container_width=False)
-            st.write("Last rolling sharpe data point is {}".format(returns_s4.sharpe[-1:].values))
-
-            st.markdown("##### Buy & Sell signals for Strat 4")
-            fig = px.line(returns_s4, x="date", y=["buy", "sell"])
-            st.plotly_chart(fig, use_container_width=False)
-
-            st.markdown("#### Strategy 10: Basic combination of systems")
-            st.markdown("Basic combination from strategy 3, strategy 4 & strategy 9")
-            mean, stdev = portfolio_info(returns_s10[["date", "ret"]])
-            st.write(
-                "Portfolio expected annualized return is {} and volatility is {}".format(
-                    mean, stdev
-                )
-            )
-            st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s10.ret.pct_change(), risk_free_rate)))
-
-            st.markdown("##### Buy&Sell signals for Strat 10")
-            fig = px.line(returns_s10, x="date", y=["buy", "sell"])
-            st.plotly_chart(fig, use_container_width=False)
-
-
-        st.markdown("#### What to buy")
-        st.markdown("")
-        st.markdown(
-            "We will use Efficient Frontier to find the optimal weight allocation of the Portfolio that returns the best sharpe ratio. "
-            "We will then print the top 3 stocks and their weights to gives us an idea where we could potentially add to the portfolio (if current weight does not exceed optimal weight). "
-        )
-        if len(stocks) > 2:
-            allocation = efficient_frontier(df, stocks)
-            df_ef = pd.DataFrame.from_dict(allocation, orient="index", columns=["weights"])
-            st.write(df_ef.sort_values("weights", ascending=False)[:3].index.tolist())
-        else:
-            st.write("No enought stocks to create optimal portfolio.")
-
-        st.markdown("")
-        st.markdown(
-            "Another way to find the optimal allocation is using the optimizer function from scipy. We will use it to find the weights that mazimize the sharpe ratio "
-        )
-        if len(stocks) > 2:
-            allocation = optimize_weights(df.pct_change(), 4, stocks)
-            st.write(allocation[:3].index.tolist())
-        else:
-            st.write("No enought stocks to create optimal portfolio.")
+            if len(stocks) > 2:
+                allocation = optimize_weights(df.pct_change(), 4, stocks)
+                st.write(allocation[:3].index.tolist())
+            else:
+                st.write("No enought stocks to create optimal portfolio.")
 
 
 def prepare_full_graph(df: pd.DataFrame, list_y: list):
