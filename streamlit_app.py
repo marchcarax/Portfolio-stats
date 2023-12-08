@@ -174,7 +174,7 @@ def main():
         returns_comb["sell_s9"] = returns_s9["sell"].values
         
         # Strategy 10: Mix of signals
-        returns_s10 = cs.compute_strat_10(returns_s10, initial_capital_v2, add_capital, start_date)
+        returns_s10 = cs.basic_combination(returns_s10, initial_capital_v2, add_capital, start_date)
 
         # st.dataframe(returns_s3)
 

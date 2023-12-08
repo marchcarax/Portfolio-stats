@@ -119,8 +119,8 @@ def compute_strat_4(df: pd.DataFrame, capital: int, add_capital: int, start_date
 
 def compute_strat_5(df: pd.DataFrame, spy: pd.DataFrame, start_date: datetime, capital: int, add_capital: int, window: int):
     """Computes complex strategy for buying when volatility is low and sell when vol is high"""
-    date_to_add = start_date + datetime.timedelta(days=30)
-    date_to_take = start_date + datetime.timedelta(days=30)
+    date_to_add = pd.to_datetime(start_date) + datetime.timedelta(days=30)
+    date_to_take = pd.to_datetime(start_date) + datetime.timedelta(days=30)
 
     spy = compute_spy_vol((spy.pct_change()), window)
 
