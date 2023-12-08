@@ -17,6 +17,11 @@ import streamlit as st
 # import quant finance libraries
 import yfinance as yf
 
+# import systems
+
+import systems
+import combined_strats as cs
+
 
 warnings.filterwarnings("ignore")
 
@@ -39,7 +44,7 @@ def main():
     st.markdown(
         "My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months."
     )
-    st.sidebar.caption("Last update: Nov 2023")
+    st.sidebar.caption("Last update: Dec 2023")
     start_date = st.sidebar.date_input("Choose Intial date", datetime.date(2019, 1, 1))
 
     # Portfolio composition and weight
@@ -120,20 +125,20 @@ def main():
 
         # Strategy 2: Buy every 3 months
         returns_s2 = returns.copy()
-        returns_s2 = compute_strat_2(returns_s2, initial_capital_v2, add_capital, start_date)
+        returns_s2 = systems.compute_strat_2(returns_s2, initial_capital_v2, add_capital, start_date)
 
         # Strategy 3: Buy everytime RSI dips below 40
         # Define our Lookback period (our sliding window)
         window_length = st.sidebar.slider("Choose window lenght for RSI", 10, 60, value=14, step=1)
         returns_s3 = returns.copy()
-        returns_s3 = compute_strat_3(
+        returns_s3 = systems.compute_strat_3(
             returns_s3, initial_capital_v2, add_capital, start_date, window_length
         )
 
         # Strategy 4: Buy everytime rolling sharpe cycles lower
         # Define our Lookback period (our sliding window)
         returns_s4 = returns.copy()
-        returns_s4["sharpe"] = rolling_sharpe(returns_s4.ret.pct_change(), 20, 0)
+        returns_s4["sharpe"] = systems.rolling_sharpe(returns_s4.ret.pct_change(), 20, 0)
         buy_signal = st.sidebar.slider(
             "Choose buying line for Rolling sharpe ratio", -10, 0, value=-1, step=1
         )
@@ -141,20 +146,20 @@ def main():
             "Choose selling line for Rolling sharpe ratio", 0, 10, value=7, step=1
         )
 
-        returns_s4 = compute_strat_4(
+        returns_s4 = systems.compute_strat_4(
             returns_s4, initial_capital_v2, add_capital, start_date, buy_signal, sell_signal
         )
 
         # Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
-        #returns_s5 = returns.copy()
-        #returns_s5 = compute_strat_5(
-        #    returns_s5,
-        #    returns_spy.set_index("Date"),
-        #    start_date,
-        #    initial_capital_v2,
-        #    add_capital,
-        #    20,
-        #)
+        returns_s5 = returns.copy()
+        returns_s5 = compute_strat_5(
+            returns_s5,
+            returns_spy.set_index("Date"),
+            start_date,
+            initial_capital_v2,
+            add_capital,
+            60,
+        )
 
         # Strategy 7: RSI & EMA cross over
 
@@ -162,16 +167,21 @@ def main():
 
         # Strategy 9: Turtle's fast system
         returns_s9 = returns.copy()
-        returns_s9 = compute_strat_9(returns_s9, initial_capital_v2, add_capital, 20, 10)
+        returns_s9 = systems.compute_strat_9(returns_s9, initial_capital_v2, add_capital, 20, 10)
 
+        # mix all signals in a single dataframe
+        returns_comb = returns.copy()
+        returns_comb["buy_s3"] = returns_s3["buy"].values
+        returns_comb["sell_s3"] = returns_s3["sell"].values
+        returns_comb["buy_s4"] = returns_s4["buy"].values
+        returns_comb["sell_s4"] = returns_s4["sell"].values
+        returns_comb["buy_s5"] = returns_s4["buy"].values
+        returns_comb["sell_s5"] = returns_s4["sell"].values
+        returns_comb["buy_s9"] = returns_s9["buy"].values
+        returns_comb["sell_s9"] = returns_s9["sell"].values
+        
         # Strategy 10: Mix of signals
-        returns_s10 = returns.copy()
-        returns_s10["rsi"] = returns_s3["rsi"].values
-        returns_s10["buy_s4"] = returns_s4["buy"].values
-        returns_s10["sell_s4"] = returns_s4["sell"].values
-        returns_s10["buy_s9"] = returns_s9["buy"].values
-        returns_s10["sell_s9"] = returns_s9["sell"].values
-        returns_s10 = compute_strat_10(returns_s10, initial_capital_v2, add_capital, start_date)
+        returns_s10 = cs.compute_strat_10(returns_s10, initial_capital_v2, add_capital, start_date)
 
         # st.dataframe(returns_s3)
 
@@ -283,11 +293,11 @@ def main():
             )
             st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s2.ret.pct_change(), risk_free_rate)))
 
-            st.markdown("#### Strategy 3: Buy after every month when RSI < 35")
+            st.markdown("#### Strategy 3: Buy after every month when RSI < 30 and sells when > 80")
             st.markdown(
-                "After an initial capital investment, we add capital every month when RSI is lower than 35 or we wait until that happens"
+                "After an initial capital investment, we add capital every month when RSI is lower than 30 and sells when above 80"
             )
-            mean, stdev = portfolio_info(returns_s3.drop(["rsi", "buy"], axis=1))
+            mean, stdev = portfolio_info(returns_s3.drop(["rsi", "buy", "sell"], axis=1))
             st.write(
                 "Portfolio expected annualized return is {} and volatility is {}".format(
                     mean, stdev
@@ -297,18 +307,19 @@ def main():
 
             st.markdown("##### RSI graph")
             fig = px.line(returns_s3, x="date", y="rsi")
-            fig.add_hline(y=35, line_color="green", line_dash="dash")
+            fig.add_hline(y=30, line_color="green", line_dash="dash")
+            fig.add_hline(y=80, line_color="red", line_dash="dash")
             st.plotly_chart(fig, use_container_width=False)
             st.write("Last RSI data point is {}".format(returns_s3.rsi[-1:].values))
 
             st.markdown("##### Buy signals for Strat 3")
-            fig = px.line(returns_s3, x="date", y="buy")
+            fig = px.line(returns_s3, x="date", y=["buy", "sell"])
             st.plotly_chart(fig, use_container_width=False)
 
 
         st.markdown("#### Advanced strategies comparison")
 
-        fig = prepare_full_graph(df_total, ["ret", "ret_s4", "ret_s9", "ret_s10"])
+        fig = prepare_full_graph(df_total, ["ret", "ret_s4", "ret_s10"])
         st.plotly_chart(fig, use_container_width=True)
         st.caption("Benchmark is 50/50 portfolio")
 
@@ -378,47 +389,6 @@ def main():
             fig = px.line(returns_s4, x="date", y=["buy", "sell"])
             st.plotly_chart(fig, use_container_width=False)
 
-            #st.markdown("#### Strategy 5: Buy everytime vol is low and sell when high vol")
-            #st.markdown(
-            #    "After an initial capital investment, we add capital every month when spy vol is low and we take capital every month when vol is at an extreme"
-            #)
-            #mean, stdev = portfolio_info(returns_s5.drop(["buy", "std"], axis=1))
-            #st.write(
-            #    "Portfolio expected annualized return is {} and volatility is {}".format(
-            #        mean, stdev
-            #    )
-            #)
-            #st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s5.ret.pct_change(), risk_free_rate)))
-#
-            #st.markdown("##### Volatility graph for SPY")
-            #fig = px.line(returns_s5, x="date", y="std")
-            #st.plotly_chart(fig, use_container_width=False)
-#
-            #st.markdown("##### Buy&Sell signals for Strat 5")
-            #fig = px.line(returns_s5, x="date", y="buy")
-            #fig.add_hrect(y0=0, y1=1, line_width=0, fillcolor="green", opacity=0.2)
-            #fig.add_hrect(y0=0, y1=-1, line_width=0, fillcolor="red", opacity=0.2)
-            #st.plotly_chart(fig, use_container_width=False)
-
-
-            st.markdown("#### Strategy 9: Follow famous Turtle system")
-            st.markdown(
-                "After an initial capital investment, we add capital every month when price breaks 20 days high and sell when price break 10 days low"
-            )
-            mean, stdev = portfolio_info(
-                returns_s9.drop(["sell", "buy", "EL", "ExL"], axis=1)
-            )
-            st.write(
-                "Portfolio expected annualized return is {} and volatility is {}".format(
-                    mean, stdev
-                )
-            )
-            st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s9.ret.pct_change(), risk_free_rate)))
-
-            st.markdown("##### Buy & Sell signals for Strat 9")
-            fig = px.line(returns_s9, x="date", y=["buy", "sell"])
-            st.plotly_chart(fig, use_container_width=False)
-
             st.markdown("#### Strategy 10: Mix of all other strategies")
             st.markdown("Mixes signals from strategy 2, strategy 4 and strategy 9")
             mean, stdev = portfolio_info(returns_s10[["date", "ret"]])
@@ -433,44 +403,6 @@ def main():
             fig = px.line(returns_s10, x="date", y=["buy", "sell"])
             st.plotly_chart(fig, use_container_width=False)
 
-        st.markdown("#### Pairs Trading")
-
-        
-        # Strategy 6: Pairs trading
-        # you can re-do this strategy by putting anything vs SPY and analyzing the mean rolling returns vs each other
-        # or do a second derivative. research again how it works
-        col1, col2 = st.columns(2)
-        with col1:
-            stock1 = st.text_input('Stock 1:', 'SPY')
-        with col2:
-            stock2 = st.text_input('Stock 1:', 'MSFT')
-
-        df_pairs = get_data([stock1, stock2], start_date = start_date, end_date = "2023-12-31")
-        df_pairs = df_pairs[['Adj Close', 'Volume']]
-        returns_s6 = compute_strat_6(df_pairs, stock1, stock2, initial_capital_s1, 20)
-        returns_s6.reset_index(inplace=True)
-        returns_s6.rename(columns={'Date':'date'}, inplace=True)
-
-        df_total = pd.merge(df_total, returns_s6.rename(columns={'ret':'ret_s6'}))
-
-        fig = prepare_full_graph(df_total, ["benchmark", "ret_s6"])
-        st.plotly_chart(fig, use_container_width=True)
-        st.caption("Benchmark is SPY")
-
-        with st.expander("See detailed data"):
-            st.markdown(f'#### Strategy 6: Using Pairs trading to shifts weights between {stock1} and {stock2}')
-            st.markdown(f'The main idea of this strat is to keep changing weights between {stock1} and {stock2} depending the strenght of each index')
-            mean, stdev = portfolio_info(returns_s6.drop(['s1_weight', stock1, 's2_weight', stock2, 'ratio', 'mean_vol_pct_change'], axis=1))
-            st.write('Portfolio expected annualized return is {} and volatility is {}'.format(mean, stdev))
-            st.write('Portfolio sharpe ratio is {0:0.2f}'.format(sharpe_ratio(returns_s6.ret.pct_change(), risk_free_rate)))
-            st.markdown(f'##### Ratio graph for {stock2} / {stock1}')
-            fig = px.line(returns_s6, x="date", y=['ratio', 'mean_vol_pct_change'])
-            st.plotly_chart(fig, use_container_width=False)
-            st.write('Mean volume for last 90 days is {}'.format(returns_s6['mean_vol_pct_change'][-1:].values))
-            st.write('Ratio between {} and {} at {}'.format(stock1, stock2, returns_s6['ratio'][-1:].values))
-            st.markdown(f'##### Weights for {stock2} / {stock1}')
-            fig = px.line(returns_s6, x="date", y=['s1_weight', 's2_weight'])
-            st.plotly_chart(fig, use_container_width=False)
 
         st.markdown("#### What to buy")
         st.markdown("")
@@ -519,21 +451,6 @@ def portfolio_info(stocks: pd.DataFrame):
     return portfolio_return * 100, float(portfolio_std_dev.values) * 100
 
 
-def sharpe_ratio(returns: pd.DataFrame, risk_free_rate: float = 0.001):
-    """Calculates sharpe ratio"""
-    returns.dropna(inplace=True)
-    excess_returns = returns - risk_free_rate
-    annualized_excess_returns = excess_returns.mean() * 252
-    annualized_volatility = returns.std() * np.sqrt(252)
-    sharpe = annualized_excess_returns / annualized_volatility
-    return sharpe
-
-
-def rolling_sharpe(df: pd.DataFrame, n: int = 20, risk_free_rate: float = 0.01):
-    """Calculates rolling sharpe ratio"""
-    r_sharpe = df.rolling(n).apply(lambda x: sharpe_ratio(x, risk_free_rate))
-    return r_sharpe
-
 
 def cum_returns(stocks: pd.DataFrame, wts: list):
     """Returns cumulative returns of the portfolio applying the assigned weights"""
@@ -541,341 +458,6 @@ def cum_returns(stocks: pd.DataFrame, wts: list):
     weighted_returns = pd.DataFrame(weighted_returns)
     port_ret = weighted_returns.sum(axis=1)
     return (port_ret + 1).cumprod()
-
-
-def compute_strat_2(df: pd.DataFrame, capital: int, add_capital: int, start_date: datetime):
-    """Computes simple strategy for buying every 3 months"""
-    date_to_add = start_date + datetime.timedelta(days=90)
-    for index, row in df.iterrows():
-        if row.date > pd.to_datetime(date_to_add):
-            capital += add_capital
-            date_to_add += datetime.timedelta(days=90)
-        df.at[index, "ret"] *= capital
-
-    return df
-
-
-def compute_strat_3(df: pd.DataFrame, capital: int, add_capital: int, start_date: datetime, n: int):
-    """Computes simple strategy for buying when rsi goes down established threshold"""
-    prices = df.ret
-    deltas = np.diff(prices)
-    seed = deltas[: n + 1]
-    up = seed[seed >= 0].sum() / n
-    down = -seed[seed < 0].sum() / n
-    rs = up / down
-    rsi = np.zeros_like(prices)
-    rsi[:n] = 100.0 - 100.0 / (1.0 + rs)
-
-    for i in range(n, len(prices)):
-        delta = deltas[i - 1]  # The diff is 1 shorter
-
-        if delta > 0:
-            upval = delta
-            downval = 0.0
-        else:
-            upval = 0.0
-            downval = -delta
-
-        up = (up * (n - 1) + upval) / n
-        down = (down * (n - 1) + downval) / n
-
-        rs = up / down
-        rsi[i] = 100.0 - 100.0 / (1.0 + rs)
-
-    df["rsi"] = rsi
-    df["buy"] = 0
-
-    date_to_add = start_date + datetime.timedelta(days=30)
-    add = False
-    for idx, row in df.iterrows():
-        if (row.rsi < 35) and (row.date > pd.to_datetime(date_to_add)):
-            capital += add_capital
-            date_to_add = row["date"] + datetime.timedelta(days=30)
-            add = True
-        df.at[idx, "ret"] *= capital
-        if add:
-            df.at[idx, "buy"] = 1
-        add = False
-
-    return df
-
-
-def compute_strat_4(df: pd.DataFrame, capital: int, add_capital: int, start_date: datetime, buy: int, sell: int):
-    """Computes complex strategy for buying/selling when sharpe ratio goes down/up a stablished threshold"""
-    df["buy"] = 0
-    df["sell"] = 0
-
-    date_to_add = start_date + datetime.timedelta(days=30)
-    date_to_take = start_date + datetime.timedelta(days=30)
-    add = False
-    take = False
-    for idx, row in df.iterrows():
-        if (row.sharpe < buy) and (row.date > pd.to_datetime(date_to_add)):
-            capital += add_capital
-            date_to_add = row["date"] + datetime.timedelta(days=30)
-            add = True
-        if add:
-            df.at[idx, "buy"] = 1
-        if (row.sharpe > sell) and (row.date > pd.to_datetime(date_to_take)):
-            capital *= 0.95  # we take 2% of benefits
-            date_to_take = row["date"] + datetime.timedelta(days=90)
-            take = True
-        if take:
-            df.at[idx, "sell"] = 1
-
-        df.at[idx, "ret"] *= capital
-        add = False
-        take = False
-
-    return df
-
-
-def compute_strat_5(df: pd.DataFrame, spy: pd.DataFrame, start_date: datetime, capital: int, add_capital: int, window: int):
-    """Computes complex strategy for buying when volatility is low and sell when vol is high"""
-    date_to_add = start_date + datetime.timedelta(days=30)
-    date_to_take = start_date + datetime.timedelta(days=30)
-
-    spy = compute_spy_vol((spy.pct_change()), window)
-
-    spy.drop(["SPY"], axis=1, inplace=True)
-    spy.reset_index(inplace=True)
-    spy.rename(columns={"Date": "date"}, inplace=True)
-
-    # df['buy'] = spy['buy'].values
-    # df['std'] = spy['std'].values
-    df = pd.merge(df, spy, on="date", how="left")
-
-    for idx, row in df.iterrows():
-        if (row.buy == 1) and (row.date > pd.to_datetime(date_to_add)):
-            capital += add_capital
-            date_to_add = row["date"] + datetime.timedelta(days=30)
-        elif (row.buy == -1) and (row.date > pd.to_datetime(date_to_take)):
-            capital *= 0.95
-            date_to_take = row["date"] + datetime.timedelta(days=30)
-        df.at[idx, "ret"] *= capital
-    return df
-
-
-def compute_strat_6(df: pd.DataFrame, stock1: str, stock2: str, capital: int, window: int):
-    """Computes pair trading strategy"""
-    ratio, mean_vol = compute_ratios(df, stock1, stock2, window)
-
-    df = df["Adj Close"]
-
-    df["ratio"] = ratio
-    df["mean_vol_pct_change"] = mean_vol
-
-    df[stock1] = df[stock1].pct_change()
-    df[stock2] = df[stock2].pct_change()
-
-    df["s1_weight"] = 0.5
-    df["s2_weight"] = 0.5
-
-    high_interval = np.mean(df.ratio) + 1 * np.std(df.ratio)
-    low_interval = np.mean(df.ratio) - 1 * np.std(df.ratio)
-
-    mem = "normal"
-
-    for idx, row in df.iterrows():
-        if row.ratio > high_interval:
-            df.at[idx, "s1_weight"] = 0.25
-            df.at[idx, "s2_weight"] = 0.75
-            mem = stock2
-        elif row.ratio < low_interval:
-            df.at[idx, "s1_weight"] = 0.75
-            df.at[idx, "s2_weight"] = 0.25
-            mem = stock1
-        if mem == stock2:
-            df.at[idx, "s1_weight"] = 0.25
-            df.at[idx, "s2_weight"] = 0.75
-        elif mem == stock1:
-            df.at[idx, "s1_weight"] = 0.75
-            df.at[idx, "s2_weight"] = 0.25
-
-    df["ret"] = (df[stock1] * df["s1_weight"]) + (df[stock2] * df["s2_weight"])
-    df["ret"] = (df["ret"] + 1).cumprod()
-    df["ret"] = df["ret"] * capital
-    return df
-
-
-def compute_ratios(df: pd.DataFrame, stock1: str, stock2: str, window: int):
-    """Calculates ratios between 2 pair of stocks"""
-    df_vol = df["Volume"]
-    df_close = df["Adj Close"]
-    close_change_1 = df_close[stock1].pct_change()
-    close_change_2 = df_close[stock2].pct_change()
-    close_change_1 = close_change_1 + 1
-    close_change_1 = np.where(close_change_1.isna(), 0, close_change_1)
-    close_change_2 = close_change_2 + 1
-    close_change_2 = np.where(close_change_2.isna(), 0, close_change_2)
-
-    vol = df_vol[stock2].pct_change()
-    vol_arr = np.array(vol + 1)
-
-    mean_vol = mean_filter1d_valid_strided(vol_arr, 90)
-    mean_vol = np.insert(mean_vol, 0, np.ones(len(vol_arr) - len(mean_vol)))
-
-    ratio_a = []
-    ratio_b = []
-    ratio = []
-    for i in range(0, len(close_change_1)):
-        if i < window:
-            ratio_a.append(1)
-            ratio_b.append(1)
-            ratio.append(1)
-        else:
-            rr_a = np.prod(close_change_1[i - window : i])
-            rr_b = np.prod(close_change_2[i - window : i])
-            ratio_a.append(rr_a)
-            ratio_b.append(rr_b)
-            ratio.append(rr_b / rr_a)
-    return ratio, mean_vol
-
-
-def compute_strat_8(df, capital):
-    """
-    Fibonacci strategy
-    This function assumes that the DataFrame df contains columns like "high," "low," and "close" representing price data for each period. 
-    It identifies buy signals when the price touches or crosses below Fibonacci levels and sells when the price hits a certain Fibonacci level (in this case, the 1.0 level). 
-    You may need to adjust the logic based on your specific trading strategy, exit criteria, or additional conditions.
-    """
-    df["buy_signal"] = 0
-    df["sell_signal"] = 0
-
-    # Define Fibonacci levels (adjust as needed)
-    fibonacci_levels = [0.236, 0.382, 0.618, 0.786, 1.0]
-
-    # Calculate price ranges based on Fibonacci levels
-    df["price_range"] = df["high"] - df["low"]
-    for level in fibonacci_levels:
-        df[f"Fib_{level}"] = df["high"] - (df["price_range"] * level)
-
-    # Implement Fibonacci strategy
-    in_position = False
-    for idx, row in df.iterrows():
-        if not in_position:
-            for level in fibonacci_levels:
-                # Buy signal: Price reaches or goes below Fibonacci level
-                if row["low"] <= row[f"Fib_{level}"]:
-                    df.at[idx, "buy_signal"] = 1
-                    entry_price = row["close"]
-                    in_position = True
-                    break
-        else:
-            # Sell signal: Price reaches or goes above 1.0 Fibonacci level (or other exit criteria)
-            if row["high"] >= row["Fib_1.0"]:
-                df.at[idx, "sell_signal"] = 1
-                exit_price = row["close"]
-                # Calculate return
-                capital *= exit_price / entry_price
-                in_position = False
-
-    return df, capital
-
-
-
-def compute_strat_9(df, capital, add_capital, w_buy, w_sell):
-    """
-    Computes Turtle strategy
-    EL: Entry long position
-    ExL: exit long position
-    """
-
-    df["EL"] = df["ret"].rolling(w_buy).max()
-    df["ExL"] = df["ret"].rolling(w_sell).min()
-
-    df["buy"] = 0
-    df["sell"] = 0
-
-    InTrade_Long = False
-
-    for idx, row in df.iterrows():
-        if (row["ret"] >= row["EL"]) and not InTrade_Long:
-            capital += add_capital
-            df.at[idx, "buy"] = 1
-            InTrade_Long = True
-        elif (row["ret"] <= row["ExL"]) and InTrade_Long:
-            capital *= 0.95
-            df.at[idx, "sell"] = 1
-            InTrade_Long = False
-
-        df.at[idx, "ret"] *= capital
-
-    return df
-
-
-def compute_strat_10(df, capital, add_capital, start_date):
-    df["buy"] = 0
-    df["sell"] = 0
-    date_to_take = start_date + datetime.timedelta(days=30)
-    date_to_add = start_date + datetime.timedelta(days=30)
-    
-    returns = []
-    
-    for idx, row in df.iterrows():
-        # Signal generation
-        buy_signal = (row["buy_s4"] == 1 and row["date"] > pd.to_datetime(date_to_add)) or \
-                     (row["buy_s9"] == 1 and row["date"] > pd.to_datetime(date_to_add)) or \
-                     (row["rsi"] <= 35 and row["date"] > pd.to_datetime(date_to_add))
-                     
-        sell_signal = (row["sell_s4"] == 1 and row["date"] > pd.to_datetime(date_to_take)) or \
-                      (row["rsi"] >= 75 and row["date"] > pd.to_datetime(date_to_take))
-        
-        # Capital adjustments
-        if buy_signal:
-            capital += add_capital
-            df.at[idx, "buy"] = 1
-            date_to_add = row["date"] + datetime.timedelta(days=15)
-        if sell_signal:
-            capital *= 0.95
-            df.at[idx, "sell"] = 1
-            date_to_take = row["date"] + datetime.timedelta(days=15)
-        
-        # Calculate returns
-        returns.append(capital)
-    
-    df["ret"] *= returns
-
-    return df
-
-
-def mean_filter1d_valid_strided(a, W):
-    """Computes mean given a window W and an array a"""
-    return strided_app(a, W, S=1).mean(axis=1)
-
-
-def strided_app(a, L, S):
-    """Window len = L, Stride len/stepsize = S"""
-    nrows = ((a.size - L) // S) + 1
-    n = a.strides[0]
-    return np.lib.stride_tricks.as_strided(a, shape=(nrows, L), strides=(S * n, n))
-
-
-def compute_spy_vol(df, window):
-    df["std"], std_avg = compute_rolling_std(df, window)
-    df["buy"] = 0
-    # print(df['std'].values)
-
-    for idx, row in df.iterrows():
-        if row["std"] * 1.5 > std_avg:
-            df.at[idx, "buy"] = -1
-        elif row["std"] * 0.8 < std_avg:
-            df.at[idx, "buy"] = 1
-        else:
-            df.at[idx, "buy"] = 0
-    return df
-
-
-def compute_rolling_std(df, window):
-    std_1 = []
-    i = 0
-    while i < len(df):
-        if i < window:
-            std_1.append(0)
-        else:
-            std_1.append(np.std(df.SPY[i - window : i]))
-        i += 1
-    return std_1, np.mean(np.array(std_1))
 
 
 @st.cache_data(ttl=604800)
