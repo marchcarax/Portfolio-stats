@@ -318,8 +318,8 @@ def main():
 
                 st.markdown("##### Rolling sharpe graph")
                 fig = px.line(returns_s4, x="date", y="sharpe")
-                fig.add_hline(y=buy_signal, line_color="green", line_dash="dash")
-                fig.add_hline(y=sell_signal, line_color="red", line_dash="dash")
+                fig.add_hline(y=-2, line_color="green", line_dash="dash")
+                fig.add_hline(y=7, line_color="red", line_dash="dash")
                 st.plotly_chart(fig, use_container_width=False)
                 st.write("Last rolling sharpe data point is {}".format(returns_s4.sharpe[-1:].values))
 
