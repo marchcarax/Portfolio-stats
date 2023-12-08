@@ -834,7 +834,7 @@ def compute_strat_10(df, capital, add_capital, start_date):
         # Calculate returns
         returns.append(capital)
     
-    df["returns"] = returns
+    df["ret"] *= returns
 
     return df
 
