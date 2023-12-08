@@ -11,8 +11,8 @@ import pandas as pd
 def basic_combination(df, capital, add_capital, start_date):
     df["buy"] = 0
     df["sell"] = 0
-    date_to_take = start_date + datetime.timedelta(days=21)
-    date_to_add = start_date + datetime.timedelta(days=7*6)
+    date_to_take = start_date + datetime.timedelta(days=42)
+    date_to_add = start_date + datetime.timedelta(days=21)
     
     returns = []
     
@@ -20,12 +20,10 @@ def basic_combination(df, capital, add_capital, start_date):
         # Signal generation
         buy_signal = (row["buy_s4"] == 1) or \
                      (row["buy_s9"] == 1) or \
-                     (row["buy_s5"] == 1) or \
                      (row["buy_s3"] == 1)
                      
         sell_signal = (row["sell_s4"] == 1) or \
                       (row["sell_s9"] == 1) or \
-                      (row["sell_s5"] == 1) or \
                       (row["sell_s3"] == 1)
         
         # Capital adjustments
@@ -51,7 +49,7 @@ def basic_combination(df, capital, add_capital, start_date):
 def voting_system(df, capital):
     df["buy"] = 0
     df["sell"] = 0
-    date_to_take = start_date + datetime.timedelta(days=21)
+    date_to_take = start_date + datetime.timedelta(days=30)
     date_to_add = start_date + datetime.timedelta(days=21)
     
     returns = []
@@ -71,7 +69,7 @@ def voting_system(df, capital):
         elif sell_signal > 2 and row["date"] > pd.to_datetime(date_to_take):
             capital *= 0.95
             df.at[idx, "sell"] = 1
-            date_to_take = row["date"] + datetime.timedelta(days=21)
+            date_to_take = row["date"] + datetime.timedelta(days=30)
 
         # Calculate returns
         returns.append(capital)

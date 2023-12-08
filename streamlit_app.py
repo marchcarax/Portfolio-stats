@@ -381,7 +381,7 @@ def main():
             st.plotly_chart(fig, use_container_width=False)
 
             st.markdown("#### Strategy 10: Basic combination of systems")
-            st.markdown("Basic combination from strategy 3, strategy 4, strategy 5 & strategy 9")
+            st.markdown("Basic combination from strategy 3, strategy 4 & strategy 9")
             mean, stdev = portfolio_info(returns_s10[["date", "ret"]])
             st.write(
                 "Portfolio expected annualized return is {} and volatility is {}".format(
