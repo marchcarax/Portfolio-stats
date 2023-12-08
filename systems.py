@@ -60,11 +60,11 @@ def compute_strat_3(df: pd.DataFrame, capital: int, add_capital: int, start_date
     add = False
     take = False
     for idx, row in df.iterrows():
-        if (row.rsi < 30) and (row.date > pd.to_datetime(date_to_add)):
+        if (row.rsi < 35) and (row.date > pd.to_datetime(date_to_add)):
             capital += add_capital
             date_to_add = row["date"] + datetime.timedelta(days=30)
             add = True
-        elif row.rsi > 80 and row.date > pd.to_datetime(date_to_take):
+        elif row.rsi > 75 and row.date > pd.to_datetime(date_to_take):
             capital *= 0.95
             take = True
             date_to_take = row["date"] + datetime.timedelta(days=30)

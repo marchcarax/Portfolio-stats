@@ -45,6 +45,7 @@ def main():
     st.markdown(
         "My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months."
     )
+    st.sidebar.caption("Version 2.0")
     st.sidebar.caption("Last update: Dec 2023")
     start_date = st.sidebar.date_input("Choose Intial date", datetime.date(2019, 1, 1))
 
@@ -295,8 +296,8 @@ def main():
 
                 st.markdown("##### RSI graph")
                 fig = px.line(returns_s3, x="date", y="rsi")
-                fig.add_hline(y=30, line_color="green", line_dash="dash")
-                fig.add_hline(y=80, line_color="red", line_dash="dash")
+                fig.add_hline(y=35, line_color="green", line_dash="dash")
+                fig.add_hline(y=75, line_color="red", line_dash="dash")
                 st.plotly_chart(fig, use_container_width=False)
                 st.write("Last RSI data point is {}".format(returns_s3.rsi[-1:].values))
 
