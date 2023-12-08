@@ -20,6 +20,7 @@ import yfinance as yf
 # import systems
 
 import systems
+from systems import sharpe_ratio
 import combined_strats as cs
 
 
