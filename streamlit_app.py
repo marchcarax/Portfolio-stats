@@ -158,7 +158,7 @@ def main():
 
         # Strategy 7: RSI & EMA cross over
 
-        # Strategy 8: Risk Parity and using pairs trading methods
+        # Strategy 8: Fibonacci levels
 
         # Strategy 9: Turtle's fast system
         returns_s9 = returns.copy()
@@ -650,7 +650,7 @@ def compute_strat_5(df: pd.DataFrame, spy: pd.DataFrame, start_date: datetime, c
             capital += add_capital
             date_to_add = row["date"] + datetime.timedelta(days=30)
         elif (row.buy == -1) and (row.date > pd.to_datetime(date_to_take)):
-            capital *= 0.98
+            capital *= 0.95
             date_to_take = row["date"] + datetime.timedelta(days=30)
         df.at[idx, "ret"] *= capital
     return df
@@ -732,6 +732,48 @@ def compute_ratios(df: pd.DataFrame, stock1: str, stock2: str, window: int):
     return ratio, mean_vol
 
 
+def compute_strat_8(df, capital):
+    """
+    Fibonacci strategy
+    This function assumes that the DataFrame df contains columns like "high," "low," and "close" representing price data for each period. 
+    It identifies buy signals when the price touches or crosses below Fibonacci levels and sells when the price hits a certain Fibonacci level (in this case, the 1.0 level). 
+    You may need to adjust the logic based on your specific trading strategy, exit criteria, or additional conditions.
+    """
+    df["buy_signal"] = 0
+    df["sell_signal"] = 0
+
+    # Define Fibonacci levels (adjust as needed)
+    fibonacci_levels = [0.236, 0.382, 0.618, 0.786, 1.0]
+
+    # Calculate price ranges based on Fibonacci levels
+    df["price_range"] = df["high"] - df["low"]
+    for level in fibonacci_levels:
+        df[f"Fib_{level}"] = df["high"] - (df["price_range"] * level)
+
+    # Implement Fibonacci strategy
+    in_position = False
+    for idx, row in df.iterrows():
+        if not in_position:
+            for level in fibonacci_levels:
+                # Buy signal: Price reaches or goes below Fibonacci level
+                if row["low"] <= row[f"Fib_{level}"]:
+                    df.at[idx, "buy_signal"] = 1
+                    entry_price = row["close"]
+                    in_position = True
+                    break
+        else:
+            # Sell signal: Price reaches or goes above 1.0 Fibonacci level (or other exit criteria)
+            if row["high"] >= row["Fib_1.0"]:
+                df.at[idx, "sell_signal"] = 1
+                exit_price = row["close"]
+                # Calculate return
+                capital *= exit_price / entry_price
+                in_position = False
+
+    return df, capital
+
+
+
 def compute_strat_9(df, capital, add_capital, w_buy, w_sell):
     """
     Computes Turtle strategy
@@ -753,7 +795,7 @@ def compute_strat_9(df, capital, add_capital, w_buy, w_sell):
             df.at[idx, "buy"] = 1
             InTrade_Long = True
         elif (row["ret"] <= row["ExL"]) and InTrade_Long:
-            capital = capital - add_capital / 2
+            capital *= 0.95
             df.at[idx, "sell"] = 1
             InTrade_Long = False
 
@@ -767,34 +809,32 @@ def compute_strat_10(df, capital, add_capital, start_date):
     df["sell"] = 0
     date_to_take = start_date + datetime.timedelta(days=30)
     date_to_add = start_date + datetime.timedelta(days=30)
-
+    
+    returns = []
+    
     for idx, row in df.iterrows():
-        # Sharpe buy and sell signals
-        if row["buy_s4"] == 1  and row.date > pd.to_datetime(date_to_add):
+        # Signal generation
+        buy_signal = (row["buy_s4"] == 1 and row["date"] > pd.to_datetime(date_to_add)) or \
+                     (row["buy_s9"] == 1 and row["date"] > pd.to_datetime(date_to_add)) or \
+                     (row["rsi"] <= 35 and row["date"] > pd.to_datetime(date_to_add))
+                     
+        sell_signal = (row["sell_s4"] == 1 and row["date"] > pd.to_datetime(date_to_take)) or \
+                      (row["rsi"] >= 75 and row["date"] > pd.to_datetime(date_to_take))
+        
+        # Capital adjustments
+        if buy_signal:
             capital += add_capital
             df.at[idx, "buy"] = 1
             date_to_add = row["date"] + datetime.timedelta(days=15)
-        if row["sell_s4"] == 1 and row.date > pd.to_datetime(date_to_take):
-            capital = capital - add_capital
+        if sell_signal:
+            capital *= 0.95
             df.at[idx, "sell"] = 1
             date_to_take = row["date"] + datetime.timedelta(days=15)
-
-        # Turtle system
-        if row["buy_s9"] == 1  and row.date > pd.to_datetime(date_to_add):
-            capital += add_capital
-            df.at[idx, "buy"] = 1
-            date_to_add = row["date"] + datetime.timedelta(days=15)
-
-        # RSI system
-        if row["rsi"] >= 75 and row.date > pd.to_datetime(date_to_take):
-            capital = capital - (add_capital*2)
-            date_to_take = row["date"] + datetime.timedelta(days=15)
-            df.at[idx, "sell"] = 1
-        if row["rsi"] <= 35 and row.date > pd.to_datetime(date_to_add):
-            capital += add_capital
-            date_to_add = row["date"] + datetime.timedelta(days=15)
-            df.at[idx, "buy"] = 1
-        df.at[idx, "ret"] *= capital
+        
+        # Calculate returns
+        returns.append(capital)
+    
+    df["returns"] = returns
 
     return df
 
