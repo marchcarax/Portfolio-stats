@@ -117,58 +117,22 @@ def compute_strat_4(df: pd.DataFrame, capital: int, add_capital: int, start_date
 
     return df
 
-def compute_strat_5(df: pd.DataFrame, spy: pd.DataFrame, start_date: datetime, capital: int, add_capital: int, window: int):
+def compute_strat_5(data: pd.DataFrame, window: int):
     """Computes complex strategy for buying when volatility is low and sell when vol is high"""
-    date_to_add = pd.to_datetime(start_date) + datetime.timedelta(days=30)
-    date_to_take = pd.to_datetime(start_date) + datetime.timedelta(days=30)
 
-    spy = compute_spy_vol((spy.pct_change()), window)
+    data = calculate_volatility(data, window)
 
-    spy.drop(["SPY"], axis=1, inplace=True)
-    spy.reset_index(inplace=True)
-    spy.rename(columns={"Date": "date"}, inplace=True)
-
-    # df['buy'] = spy['buy'].values
-    # df['std'] = spy['std'].values
-    df = pd.merge(df, spy, on="date", how="left")
-
-    for idx, row in df.iterrows():
-        if (row.buy == 1) and (row.date > pd.to_datetime(date_to_add)):
-            capital += add_capital
-            date_to_add = row["date"] + datetime.timedelta(days=30)
-        elif (row.sell == 1) and (row.date > pd.to_datetime(date_to_take)):
-            capital *= 0.95
-            date_to_take = row["date"] + datetime.timedelta(days=30)
-        df.at[idx, "ret"] *= capital
+    # Generate buy/sell signals based on volatility comparison
+    data['buy'] = np.where(data['volatility'] < data['volatility'].shift(1), 1, 0)
+    data['sell'] = np.where(data['volatility'] > data['volatility'].shift(1), 1, 0)
+        
     return df
 
-def compute_spy_vol(df, window):
-    df["std"], std_avg = compute_rolling_std(df, window)
-    df["buy"] = 0
-    df["sell"] = 0
-    # print(df['std'].values)
-
-    for idx, row in df.iterrows():
-        if row["std"] * 1.5 > std_avg:
-            df.at[idx, "sell"] = 1
-        elif row["std"] * 0.8 < std_avg:
-            df.at[idx, "buy"] = 1
-        else:
-            df.at[idx, "buy"] = 0
-            df.at[idx, "sell"] = 0
-    return df
-
-
-def compute_rolling_std(df, window):
-    std_1 = []
-    i = 0
-    while i < len(df):
-        if i < window:
-            std_1.append(0)
-        else:
-            std_1.append(np.std(df.SPY[i - window : i]))
-        i += 1
-    return std_1, np.mean(np.array(std_1))
+def calculate_volatility(data, window=365):
+    # Calculate historical volatility using the window
+    data['log_returns'] = np.log(data['close'] / data['close'].shift(1))
+    data['volatility'] = data['log_returns'].rolling(window=window).std() * np.sqrt(window)
+    return data
 
 
 def compute_strat_6(df: pd.DataFrame, stock1: str, stock2: str, capital: int, window: int):

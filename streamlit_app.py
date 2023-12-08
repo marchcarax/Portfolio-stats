@@ -152,7 +152,7 @@ def main():
 
         # Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
         returns_s5 = returns.copy()
-        returns_s5 = compute_strat_5(returns_s5,returns_spy.set_index("Date"),start_date,initial_capital_v2,add_capital,60)
+        returns_s5 = systems.compute_strat_5(returns_s5,365)
 
         # Strategy 7: RSI & EMA cross over
 
@@ -168,8 +168,8 @@ def main():
         returns_comb["sell_s3"] = returns_s3["sell"].values
         returns_comb["buy_s4"] = returns_s4["buy"].values
         returns_comb["sell_s4"] = returns_s4["sell"].values
-        returns_comb["buy_s5"] = returns_s4["buy"].values
-        returns_comb["sell_s5"] = returns_s4["sell"].values
+        returns_comb["buy_s5"] = returns_s5["buy"].values
+        returns_comb["sell_s5"] = returns_s5["sell"].values
         returns_comb["buy_s9"] = returns_s9["buy"].values
         returns_comb["sell_s9"] = returns_s9["sell"].values
         
