@@ -130,7 +130,7 @@ def compute_strat_5(data: pd.DataFrame, window: int):
 
 def calculate_volatility(data, window=365):
     # Calculate historical volatility using the window
-    data['log_returns'] = np.log(data['close'] / data['close'].shift(1))
+    data['log_returns'] = np.log(data['ret'] / data['ret'].shift(1))
     data['volatility'] = data['log_returns'].rolling(window=window).std() * np.sqrt(window)
     return data
 
