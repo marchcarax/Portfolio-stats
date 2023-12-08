@@ -126,7 +126,7 @@ def compute_strat_5(data: pd.DataFrame, window: int):
     data['buy'] = np.where(data['volatility'] < data['volatility'].shift(1), 1, 0)
     data['sell'] = np.where(data['volatility'] > data['volatility'].shift(1), 1, 0)
         
-    return df
+    return data
 
 def calculate_volatility(data, window=365):
     # Calculate historical volatility using the window
