@@ -126,14 +126,14 @@ def main():
 
         # Strategy 2: Buy every 3 months
         returns_s2 = returns.copy()
-        returns_s2 = systems.compute_strat_2(returns_s2, initial_capital_v2, add_capital, start_date)
+        returns_s2 = systems.compute_strat_2(returns_s2, initial_capital, add_capital, start_date)
 
         # Strategy 3: Buy everytime RSI dips below 40
         # Define our Lookback period (our sliding window)
         window_length = st.sidebar.slider("Choose window lenght for RSI", 10, 60, value=14, step=1)
         returns_s3 = returns.copy()
         returns_s3 = systems.compute_strat_3(
-            returns_s3, initial_capital_v2, add_capital, start_date, window_length
+            returns_s3, initial_capital, add_capital, start_date, window_length
         )
 
         # Strategy 4: Buy everytime rolling sharpe cycles lower
@@ -148,7 +148,7 @@ def main():
         )
 
         returns_s4 = systems.compute_strat_4(
-            returns_s4, initial_capital_v2, add_capital, start_date, buy_signal, sell_signal
+            returns_s4, initial_capital, add_capital, start_date, buy_signal, sell_signal
         )
 
         # Strategy 5: Buy whenever there is low volatily and sell at high volatility periods
@@ -161,7 +161,7 @@ def main():
 
         # Strategy 9: Turtle's fast system
         returns_s9 = returns.copy()
-        returns_s9 = systems.compute_strat_9(returns_s9, initial_capital_v2, add_capital, 20, 10)
+        returns_s9 = systems.compute_strat_9(returns_s9, initial_capital, add_capital, 20, 10)
 
         # mix all signals in a single dataframe
         returns_comb = returns.copy()
@@ -175,7 +175,7 @@ def main():
         returns_comb["sell_s9"] = returns_s9["sell"].values
         
         # Strategy 10: Mix of signals
-        returns_s10 = cs.basic_combination(returns_comb, initial_capital_v2, add_capital, start_date)
+        returns_s10 = cs.basic_combination(returns_comb, initial_capital, add_capital, start_date)
 
         # st.dataframe(returns_s3)
 
@@ -277,8 +277,8 @@ def main():
             )
             st.write("Portfolio sharpe ratio is {0:0.2f}".format(sharpe_ratio(returns_s1.ret.pct_change(), risk_free_rate)))
 
-            st.markdown("#### Strategy 2: Buy every 3 months")
-            st.markdown("After an initial capital investment, we add capital every 3 months")
+            st.markdown("#### Strategy 2: Buy & sells periodically")
+            st.markdown("After an initial capital investment, we add capital every 3 months and sell every 5 months a 2% of the portfolio")
             mean, stdev = portfolio_info(returns_s2)
             st.write(
                 "Portfolio expected annualized return is {} and volatility is {}".format(
@@ -383,8 +383,8 @@ def main():
             fig = px.line(returns_s4, x="date", y=["buy", "sell"])
             st.plotly_chart(fig, use_container_width=False)
 
-            st.markdown("#### Strategy 10: Mix of all other strategies")
-            st.markdown("Mixes signals from strategy 2, strategy 4 and strategy 9")
+            st.markdown("#### Strategy 10: Basic combination of systems")
+            st.markdown("Basic combination from strategy 3, strategy 4, strategy 5 & strategy 9")
             mean, stdev = portfolio_info(returns_s10[["date", "ret"]])
             st.write(
                 "Portfolio expected annualized return is {} and volatility is {}".format(

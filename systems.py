@@ -9,12 +9,16 @@ import pandas as pd
 from scipy.optimize import minimize
 
 def compute_strat_2(df: pd.DataFrame, capital: int, add_capital: int, start_date: datetime):
-    """Computes simple strategy for buying every 3 months"""
+    """Computes simple strategy for buying every 3 months and sells every 150 days"""
     date_to_add = start_date + datetime.timedelta(days=90)
+    date_to_take = start_date + datetime.timedelta(days=150)
     for index, row in df.iterrows():
         if row.date > pd.to_datetime(date_to_add):
             capital += add_capital
             date_to_add += datetime.timedelta(days=90)
+        if row.date > pd.to_datetime(date_to_take):
+            capital *= 0.98  # we take 2% of benefits
+            date_to_take += datetime.timedelta(days=150)
         df.at[index, "ret"] *= capital
 
     return df
@@ -52,6 +56,7 @@ def compute_strat_3(df: pd.DataFrame, capital: int, add_capital: int, start_date
     df["sell"] = 0
 
     date_to_add = start_date + datetime.timedelta(days=30)
+    date_to_take = start_date + datetime.timedelta(days=30)
     add = False
     take = False
     for idx, row in df.iterrows():
@@ -59,9 +64,10 @@ def compute_strat_3(df: pd.DataFrame, capital: int, add_capital: int, start_date
             capital += add_capital
             date_to_add = row["date"] + datetime.timedelta(days=30)
             add = True
-        elif row.rsi > 80:
+        elif row.rsi > 80 and row.date > pd.to_datetime(date_to_take):
             capital *= 0.95
             take = True
+            date_to_take = row["date"] + datetime.timedelta(days=30)
         df.at[idx, "ret"] *= capital
         if add:
             df.at[idx, "buy"] = 1
