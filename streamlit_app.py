@@ -158,7 +158,7 @@ def main():
             start_date,
             initial_capital_v2,
             add_capital,
-            60,
+            60
         )
 
         # Strategy 7: RSI & EMA cross over
