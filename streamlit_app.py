@@ -173,10 +173,12 @@ def main():
         returns_comb["sell_s9"] = returns_s9["sell"].values
         
         # Strategy 10: Mix of signals
-        returns_s10 = cs.basic_combination(returns_comb, initial_capital, add_capital, start_date)
+        returns_s10 = returns_comb.copy()
+        returns_s10 = cs.basic_combination(returns_s10, initial_capital, add_capital, start_date)
 
         # Strategy 11: voting systems
-        returns_s11 = cs.voting_system(returns_comb, initial_capital, add_capital, start_date)
+        returns_s11 = returns_comb.copy()
+        returns_s11 = cs.voting_system(returns_s11, initial_capital, add_capital, start_date)
 
         # st.dataframe(returns_s3)
 
