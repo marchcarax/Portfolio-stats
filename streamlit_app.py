@@ -165,8 +165,8 @@ def main():
         returns_comb["sell_s4"] = returns_s4["sell"].values
         returns_comb["buy_s5"] = returns_s5["buy"].values
         returns_comb["sell_s5"] = returns_s5["sell"].values
-        returns_comb["buy_s7"] = returns_s7["buy"].values
-        returns_comb["sell_s7"] = returns_s7["sell"].values
+        #returns_comb["buy_s7"] = returns_s7["buy"].values
+        #returns_comb["sell_s7"] = returns_s7["sell"].values
         returns_comb["buy_s8"] = returns_s8["buy"].values
         returns_comb["sell_s8"] = returns_s8["sell"].values
         returns_comb["buy_s9"] = returns_s9["buy"].values
