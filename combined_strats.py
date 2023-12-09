@@ -46,7 +46,7 @@ def basic_combination(df, capital, add_capital, start_date):
 # voting system
 # same as above, but add signals
 
-def voting_system(df, capital):
+def voting_system(df, capital, add_capital, start_date):
     df["buy"] = 0
     df["sell"] = 0
     date_to_take = start_date + datetime.timedelta(days=30)
@@ -57,16 +57,16 @@ def voting_system(df, capital):
     # Implement super strategy actions based on voting results
     for idx, row in df.iterrows():
 
-        buy_signal = row["buy_s4"] + row["buy_s9"] + row["buy_s3"] + row["buy_s5"]
+        buy_signal = row["buy_s4"] + row["buy_s9"] + row["buy_s3"] + row["buy_s5"] + row["buy_s7"] + row["buy_s8"]
                      
-        sell_signal = row["sell_s4"] + row["sell_s9"] + row["sell_s3"] + row["sell_s5"]
+        sell_signal = row["sell_s4"] + row["sell_s9"] + row["sell_s3"] + row["sell_s5"] + row["sell_s7"] + row["sell_s8"]
 
-        if buy_signal > 2 and row["date"] > pd.to_datetime(date_to_add):
+        if buy_signal > 3 and row["date"] > pd.to_datetime(date_to_add):
             capital += add_capital
             df.at[idx, "buy"] = 1
             date_to_add = row["date"] + datetime.timedelta(days=21)
             
-        elif sell_signal > 2 and row["date"] > pd.to_datetime(date_to_take):
+        elif sell_signal > 3 and row["date"] > pd.to_datetime(date_to_take):
             capital *= 0.95
             df.at[idx, "sell"] = 1
             date_to_take = row["date"] + datetime.timedelta(days=30)

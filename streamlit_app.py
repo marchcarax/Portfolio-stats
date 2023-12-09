@@ -45,7 +45,7 @@ def main():
     st.markdown(
         "My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months."
     )
-    st.sidebar.caption("Version 2.0")
+    st.sidebar.caption("Version 2.1")
     st.sidebar.caption("Last update: Dec 2023")
     start_date = st.sidebar.date_input("Choose Intial date", datetime.date(2019, 1, 1))
 
@@ -146,8 +146,12 @@ def main():
         returns_s5 = systems.compute_strat_5(returns_s5,365)
 
         # Strategy 7: RSI & EMA cross over
+        returns_s7 = returns.copy()
+        returns_s7 = systems.compute_strat_7(returns_s7, initial_capital, add_capital)
 
         # Strategy 8: Fibonacci levels
+        returns_s8 = returns.copy()
+        returns_s8 = systems.compute_strat_7(returns_s8, initial_capital, add_capital)
 
         # Strategy 9: Turtle's fast system
         returns_s9 = returns.copy()
@@ -161,11 +165,18 @@ def main():
         returns_comb["sell_s4"] = returns_s4["sell"].values
         returns_comb["buy_s5"] = returns_s5["buy"].values
         returns_comb["sell_s5"] = returns_s5["sell"].values
+        returns_comb["buy_s7"] = returns_s7["buy"].values
+        returns_comb["sell_s7"] = returns_s7["sell"].values
+        returns_comb["buy_s8"] = returns_s8["buy"].values
+        returns_comb["sell_s8"] = returns_s8["sell"].values
         returns_comb["buy_s9"] = returns_s9["buy"].values
         returns_comb["sell_s9"] = returns_s9["sell"].values
         
         # Strategy 10: Mix of signals
         returns_s10 = cs.basic_combination(returns_comb, initial_capital, add_capital, start_date)
+
+        # Strategy 11: voting systems
+        returns_s11 = cs.voting_system(returns_comb, initial_capital, add_capital, start_date)
 
         # st.dataframe(returns_s3)
 
@@ -184,6 +195,7 @@ def main():
             #df_total["ret_s5"] = returns_s5.ret
             df_total["ret_s9"] = returns_s9.ret
             df_total["ret_s10"] = returns_s10.ret
+            df_total["ret_s11"] = returns_s11.ret
 
             fig = prepare_full_graph(df_total, ["benchmark", "ret", "ret_s2", "ret_s3", "ret_s4"])
             st.plotly_chart(fig, use_container_width=True)
@@ -331,7 +343,7 @@ def main():
         with tab2:
             st.markdown("#### Advanced strategies comparison")
 
-            fig = prepare_full_graph(df_total, ["ret", "ret_s10"])
+            fig = prepare_full_graph(df_total, ["ret", "ret_s10", "ret_s11"])
             st.plotly_chart(fig, use_container_width=True)
             st.caption("Benchmark is 50/50 portfolio")
 

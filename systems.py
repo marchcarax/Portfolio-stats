@@ -216,51 +216,96 @@ def compute_ratios(df: pd.DataFrame, stock1: str, stock2: str, window: int):
     return ratio, mean_vol
 
 
-def compute_strat_8(df, capital):
+def compute_strat_7(df, capital, add_capital):
+    """Computes Turtle trading system"""
+
+    # Initialize variables
+    long_position = False
+    open_trade_price = None
+    exit_price = None
+
+    # Calculate 20-day and 55-day moving averages
+    df["MA20"] = df["close"].rolling(window=20).mean()
+    df["MA55"] = df["close"].rolling(window=55).mean()
+
+    for idx, row in df.iterrows():
+        # Check for buy signal
+        if not long_position and row["MA20"] > row["MA55"]:
+            capital += add_capital
+            long_position = True
+
+        # Check for sell signal
+        if long_position and row["MA20"] < row["MA55"]:
+            capital *= 0.95
+            long_position = False
+
+        # Calculate daily returns
+        df.at[idx, "ret"] *= capital
+
+    
+    return df, capital
+
+# Load data
+data = pd.read_csv("EURUSD.csv", index_col="Date", parse_dates=True)
+
+# Compute Turtle trading system
+df, capital = compute_strat_8(data.copy(), 10000, 2000)
+
+# Print results
+print(df[["ret", "MA20", "MA55"]])
+print("Final capital:", capital)
+
+
+
+def compute_strat_8(df, capital, add_capital):
     """
     Fibonacci strategy
     This function assumes that the DataFrame df contains columns like "high," "low," and "close" representing price data for each period. 
     It identifies buy signals when the price touches or crosses below Fibonacci levels and sells when the price hits a certain Fibonacci level (in this case, the 1.0 level). 
     You may need to adjust the logic based on your specific trading strategy, exit criteria, or additional conditions.
     """
-    df["buy_signal"] = 0
-    df["sell_signal"] = 0
+    df["buy"] = 0
+    df["sell"] = 0
 
     # Define Fibonacci levels (adjust as needed)
     fibonacci_levels = [0.236, 0.382, 0.618, 0.786, 1.0]
 
     # Calculate price ranges based on Fibonacci levels
-    df["price_range"] = df["high"] - df["low"]
-    for level in fibonacci_levels:
-        df[f"Fib_{level}"] = df["high"] - (df["price_range"] * level)
+    df['max_window'] = df['ret'].rolling(window=window).max()
+    df['min_window'] = df['ret'].rolling(window=window).min()
+    df["price_range"] = df["max_window"] - df['min_window']
 
     # Implement Fibonacci strategy
     in_position = False
     for idx, row in df.iterrows():
+        for level in fibonacci_levels:
+            row[f"Fib_{level}"] = row["ret"] - (row["price_range"] * level)
+
         if not in_position:
             for level in fibonacci_levels:
                 # Buy signal: Price reaches or goes below Fibonacci level
-                if row["low"] <= row[f"Fib_{level}"]:
-                    df.at[idx, "buy_signal"] = 1
-                    entry_price = row["close"]
+                if row["ret"] <= row[f"Fib_{level}"]:
+                    df.at[idx, "buy"] = 1
+                    capital += add_capital
                     in_position = True
                     break
         else:
             # Sell signal: Price reaches or goes above 1.0 Fibonacci level (or other exit criteria)
-            if row["high"] >= row["Fib_1.0"]:
-                df.at[idx, "sell_signal"] = 1
-                exit_price = row["close"]
+            if row["ret"] >= row["Fib_1.0"]:
+                df.at[idx, "sell"] = 1
                 # Calculate return
-                capital *= exit_price / entry_price
+                capital *= 0.95
                 in_position = False
 
-    return df, capital
+        df.at[idx, "ret"] *= capital
+
+    return df
 
 
 
 def compute_strat_9(df, capital, add_capital, w_buy, w_sell):
     """
-    Computes Turtle strategy
+    Computes Turtle strategy second version
     EL: Entry long position
     ExL: exit long position
     """
