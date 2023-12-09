@@ -221,8 +221,6 @@ def compute_strat_7(df, capital, add_capital):
 
     # Initialize variables
     long_position = False
-    open_trade_price = None
-    exit_price = None
     df["buy"] = 0
     df["sell"] = 0
 

@@ -151,7 +151,7 @@ def main():
 
         # Strategy 8: Fibonacci levels
         returns_s8 = returns.copy()
-        returns_s8 = systems.compute_strat_7(returns_s8, initial_capital, add_capital)
+        returns_s8 = systems.compute_strat_8(returns_s8, initial_capital, add_capital)
 
         # Strategy 9: Turtle's fast system
         returns_s9 = returns.copy()
