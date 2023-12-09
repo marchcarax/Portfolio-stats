@@ -57,9 +57,9 @@ def voting_system(df, capital, add_capital, start_date):
     # Implement super strategy actions based on voting results
     for idx, row in df.iterrows():
 
-        buy_signal = row["buy_s4"] + row["buy_s9"] + row["buy_s3"] + row["buy_s5"] + row["buy_s7"] + row["buy_s8"]
+        buy_signal = row["buy_s4"] + row["buy_s9"] + row["buy_s3"] + row["buy_s5"] + row["buy_s8"]
                      
-        sell_signal = row["sell_s4"] + row["sell_s9"] + row["sell_s3"] + row["sell_s5"] + row["sell_s7"] + row["sell_s8"]
+        sell_signal = row["sell_s4"] + row["sell_s9"] + row["sell_s3"] + row["sell_s5"] + row["sell_s8"]
 
         if buy_signal > 3 and row["date"] > pd.to_datetime(date_to_add):
             capital += add_capital
