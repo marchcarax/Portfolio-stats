@@ -223,6 +223,8 @@ def compute_strat_7(df, capital, add_capital):
     long_position = False
     open_trade_price = None
     exit_price = None
+    df["buy"] = 0
+    df["sell"] = 0
 
     # Calculate 20-day and 55-day moving averages
     df["MA20"] = df["ret"].rolling(window=20).mean()
@@ -233,11 +235,13 @@ def compute_strat_7(df, capital, add_capital):
         if not long_position and row["MA20"] > row["MA55"]:
             capital += add_capital
             long_position = True
+            df.at[idx, "buy"] = 1
 
         # Check for sell signal
         if long_position and row["MA20"] < row["MA55"]:
             capital *= 0.95
             long_position = False
+            df.at[idx, "sell"] = 1
 
         # Calculate daily returns
         df.at[idx, "ret"] *= capital
