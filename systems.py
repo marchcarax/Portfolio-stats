@@ -245,17 +245,6 @@ def compute_strat_7(df, capital, add_capital):
     
     return df, capital
 
-# Load data
-data = pd.read_csv("EURUSD.csv", index_col="Date", parse_dates=True)
-
-# Compute Turtle trading system
-df, capital = compute_strat_8(data.copy(), 10000, 2000)
-
-# Print results
-print(df[["ret", "MA20", "MA55"]])
-print("Final capital:", capital)
-
-
 
 def compute_strat_8(df, capital, add_capital):
     """
