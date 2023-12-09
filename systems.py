@@ -225,8 +225,8 @@ def compute_strat_7(df, capital, add_capital):
     exit_price = None
 
     # Calculate 20-day and 55-day moving averages
-    df["MA20"] = df["close"].rolling(window=20).mean()
-    df["MA55"] = df["close"].rolling(window=55).mean()
+    df["MA20"] = df["ret"].rolling(window=20).mean()
+    df["MA55"] = df["ret"].rolling(window=55).mean()
 
     for idx, row in df.iterrows():
         # Check for buy signal
