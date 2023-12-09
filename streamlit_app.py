@@ -343,7 +343,7 @@ def main():
         with tab2:
             st.markdown("#### Advanced strategies comparison")
 
-            fig = prepare_full_graph(df_total, ["ret", "ret_s10", "ret_s11"])
+            fig = prepare_full_graph(df_total, ["ret", "ret_s10"])
             st.plotly_chart(fig, use_container_width=True)
             st.caption("Benchmark is 50/50 portfolio")
 
