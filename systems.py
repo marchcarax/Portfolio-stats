@@ -248,7 +248,7 @@ def compute_strat_7(df, capital, add_capital):
     return df, capital
 
 
-def compute_strat_8(df, capital, add_capital):
+def compute_strat_8(df, capital, add_capital, window):
     """
     Fibonacci strategy
     This function assumes that the DataFrame df contains columns like "high," "low," and "close" representing price data for each period. 
