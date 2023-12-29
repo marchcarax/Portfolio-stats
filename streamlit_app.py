@@ -97,9 +97,9 @@ def main():
         def get_data(stocks, start_date, end_date):
             return yf.download(stocks, start=start_date, end=end_date)
 
-        df = get_data(stocks, start_date=start_date, end_date="2023-12-31")
+        df = get_data(stocks, start_date=start_date, end_date="2024-12-31")
         df = df["Adj Close"]
-        spy = get_data("spy", start_date=start_date, end_date="2023-12-31")
+        spy = get_data("spy", start_date=start_date, end_date="2024-12-31")
         spy = spy[["Adj Close"]]
         spy.rename(columns={"Adj Close": "SPY"}, inplace=True)
 
