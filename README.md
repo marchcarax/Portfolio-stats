@@ -1,17 +1,36 @@
-Easy and quick Portfolio Analysis tools
+# Portfolio Strategy Analysis
 
-Main tools I use for Portfolio analysis and optimization.
-Remember to keep a history of your portfolio performance by saving the output.txt and pdf in other folders.
+## About the Project
+**Portfolio Strategy Analysis** is a Streamlit application developed by Marc, designed to demonstrate the potential of simple investment strategies in outperforming the market over the long term. This project emphasizes the naive principle of maintaining an equal-weighted portfolio, ensuring that each addition to the portfolio is distributed equally among all positions.
 
-For a quick glance at a ticker fundamental data, run fanal_main.py and put the Stock Ticker to analyze.
+## Key Features
+- **Equal-Weighted Portfolio Simulation:** Analyze how an equal-weighted investment strategy performs over time.
+- **Custom Portfolio Simulation:** Create and track the performance of custom-made portfolios, allowing users to experiment with different compositions and strategies.
+- **Focus on US and European Stocks:** The app primarily deals with a mix of US and European stocks, reflecting the developer's personal investment focus.
+- **Dynamic Portfolio:** The model portfolio comprises fewer than 20 companies and is updated periodically, every 3 to 6 months, to adapt to changing market conditions.
 
-How to use:
-* Open Stats_main.py and put the stocks names from your portfolio (same name from yahoo finance i.e. Repsol is rep.mc) and weights
-* Define the period you want to analyze
-* Run to_pdf.py file
-* Open output.txt and pdf file 
+## How to Use
+1. **Select a Strategy:** Choose between an equal-weighted strategy or create your custom portfolio.
+2. **Input Portfolio Details:** For custom portfolios, input the specifics of your stock selection, focusing on US and European markets.
+3. **Simulate Performance:** The app will simulate and display the performance of your chosen portfolio strategy over the selected timeframe.
+4. **Compare and Analyze:** Evaluate the performance against market benchmarks to understand the efficacy of your strategy.
 
-Will update in the future with strategies of how to use these tools and how to add/take exposure from the market.
-Also, will upload some personal projects with time:
-* Predictive modelling: we will research the utility of basic predictive models
-* Some of my most successful trading strategies (Mean reversion, Pairs trading)
+## How to Run
+To run the Portfolio Strategy Analysis application on your local machine, follow these steps:
+1. **Create a Virtual Environment:** Run `python -m venv .venv` in your terminal to create a new virtual environment.
+2. **Activate the Virtual Environment:** 
+   - For Windows, run `.venv\Scripts\activate`.
+   - For macOS/Linux, run `source .venv/bin/activate`.
+3. **Install Requirements:** Install the necessary requirements by running `pip install -r requirements.txt`.
+4. **Launch the Application:** Start the Streamlit app by executing `streamlit run streamlit-app.py`.
+
+## Project Goals
+The primary goal of this project is to showcase that simple, well-thought-out investment strategies can yield significant returns over the long term. It aims to provide a user-friendly platform for both novice and experienced investors to test and visualize different investment strategies.
+
+## Getting Started
+To start using the Portfolio Strategy Analysis app, follow these steps:
+- Visit the Streamlit app link (insert link here).
+- Follow the on-screen instructions to simulate and analyze different investment strategies.
+
+## License
+This project is licensed under the [MIT License](insert link to license).
