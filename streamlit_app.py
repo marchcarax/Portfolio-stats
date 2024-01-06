@@ -45,7 +45,7 @@ def main():
     st.markdown(
         "My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months."
     )
-    st.sidebar.caption("Version 2.2")
+    st.sidebar.caption("Version 2.2.1")
     st.sidebar.caption("Last update: Jan 2024")
     start_date = st.sidebar.date_input("Choose Intial date", datetime.date(2019, 1, 1))
 
@@ -66,10 +66,8 @@ def main():
             "or.pa",
             "san.pa",
             "regn",
-            "atvi",
             "msft",
             "team",
-            "googl",
             "nvda",
             "abnb",
             "sbux"

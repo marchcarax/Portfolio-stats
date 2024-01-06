@@ -196,7 +196,7 @@ def compute_ratios(df: pd.DataFrame, stock1: str, stock2: str, window: int):
     vol = df_vol[stock2].pct_change()
     vol_arr = np.array(vol + 1)
 
-    mean_vol = mean_filter1d_valid_strided(vol_arr, 90)
+    mean_vol = np.mean(vol_arr, 90)
     mean_vol = np.insert(mean_vol, 0, np.ones(len(vol_arr) - len(mean_vol)))
 
     ratio_a = []
