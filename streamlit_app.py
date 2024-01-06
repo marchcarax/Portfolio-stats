@@ -196,9 +196,7 @@ def main():
             df_total["ret_s4"] = returns_s4.ret
             #df_total["ret_s5"] = returns_s5.ret
             df_total["ret_s9"] = returns_s9.ret
-            df_total["ret_s10"] = returns_s10.ret
-            df_total["ret_s11"] = returns_s11.ret
-
+            
             fig = prepare_full_graph(df_total, ["benchmark", "ret", "ret_s2", "ret_s3", "ret_s4"])
             st.plotly_chart(fig, use_container_width=True)
             # df_total['dia'] = df_total.date.day
@@ -344,6 +342,8 @@ def main():
 
         with tab2:
             st.markdown("#### Advanced strategies comparison")
+            df_total["ret_s10"] = returns_s10.ret
+            df_total["ret_s11"] = returns_s11.ret
 
             fig = prepare_full_graph(df_total, ["ret", "ret_s10", "ret_s11"])
             st.plotly_chart(fig, use_container_width=True)
