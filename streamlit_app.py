@@ -195,7 +195,9 @@ def main():
             df_total["ret_s3"] = returns_s3.ret
             df_total["ret_s4"] = returns_s4.ret
             #df_total["ret_s5"] = returns_s5.ret
-            df_total["ret_s9"] = returns_s9.ret
+            #df_total["ret_s9"] = returns_s9.ret
+
+            df_total = df_total.sort_values(by='date')
             
             fig = prepare_full_graph(df_total, ["benchmark", "ret", "ret_s2", "ret_s3", "ret_s4"])
             st.plotly_chart(fig, use_container_width=True)
