@@ -46,7 +46,7 @@ def main():
         "My portfolio consist of a mix of US and European stocks and I try to keep it at less than 20 companies. It changes every 3 to 6 months."
     )
     st.sidebar.caption("Version 2.2.1")
-    st.sidebar.caption("Last update: Jan 2024")
+    st.sidebar.caption("Last update: Mar 2024")
     start_date = st.sidebar.date_input("Choose Intial date", datetime.date(2019, 1, 1))
 
     # Portfolio composition and weight
@@ -73,7 +73,7 @@ def main():
     elif portfolio == "CFC-Futures":
         stocks = ["btc-eur","eth-eur","EURUSD=X","GC=F","BZ=F"]
     elif portfolio == "M&C":
-        stocks = ["meta", "mc.pa", "googl"]
+        stocks = ["meta", "mc.pa", "itx.mc", "nvda", "mdb", "su.pa", "nvo"]
     else:
         st.markdown(
             "Put stock tickets separated by commas without spaces (e.g. qqq,msft,aapl,ibe.mc)"
